@@ -1,7 +1,9 @@
-package com.example.group55.androidchess55;
+package activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.group55.androidchess55.R;
 
 public class MainActivity extends AppCompatActivity {
 
