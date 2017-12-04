@@ -3,4 +3,9 @@
     <string name="new_game">New Game</string>
     <string name="saved_games">Saved Games</string>
     <string name="chess_title">Chess</string>
+    <string name="ai_move">AI Move</string>
+    <string name="undo">Undo</string>
+    <string name="draw">Draw</string>
+    <string name="forfeit">Forfeit</string>
+    <string name="submit">Submit</string>
 </resources>

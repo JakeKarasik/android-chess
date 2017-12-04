@@ -5,8 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
 
 import com.example.group55.androidchess55.R;
+import com.example.group55.androidchess55.activities.ChessBoard.adapters.ChessBoardAdapter;
 import com.example.group55.androidchess55.models.*;
 
 import java.util.ArrayList;
@@ -26,12 +29,16 @@ public class ChessBoardActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
 
         //Create board
-        ArrayList<ChessPiece> board = new ArrayList<ChessPiece>(64);
-        board.add(new Pawn('b'));
+        ChessPiece[] board = new ChessPiece[64];
+        board[0] = new Pawn('b');
+        board[36] = new Pawn('b');
+        board[63] = new Pawn('w');
+        board[3] = new King('b');
 
 
-        ArrayAdapter<ChessPiece> adapter= new ArrayAdapter<ChessPiece>(ChessBoardActivity.this, android.R.layout.simple_list_item_1,board);
-        //findViewById(R.id.board_grid).setAdapter(adapter);
+        BaseAdapter adapter = new ChessBoardAdapter(ChessBoardActivity.this, board);
+        GridView board_grid = (GridView)findViewById(R.id.board_grid);
+        board_grid.setAdapter(adapter);
     }
 
 //    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener()
