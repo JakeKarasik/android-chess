@@ -1,7 +1,9 @@
-package com.example.group55.androidchess55;
+package com.example.group55.androidchess55.activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.example.group55.androidchess55.R;
 
 public class SavedGames extends AppCompatActivity {
 

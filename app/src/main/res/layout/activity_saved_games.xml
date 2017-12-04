@@ -4,6 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.group55.androidchess55.SavedGames">
+    tools:context="com.example.group55.androidchess55.activities.SavedGames">
 
 </android.support.constraint.ConstraintLayout>
