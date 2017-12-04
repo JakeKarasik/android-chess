@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">AndroidChess55</string>
+    <string name="new_game">New Game</string>
+    <string name="saved_games">Saved Games</string>
+    <string name="chess_title">Chess</string>
 </resources>

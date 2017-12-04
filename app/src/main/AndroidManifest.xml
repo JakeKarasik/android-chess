@@ -9,15 +9,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.HomeScreen">
+        <activity android:name=".activities.HomeScreen.HomeScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.SavedGames"></activity>
-        <activity android:name=".activities.ChessBoard"></activity>
+        <activity   android:name=".activities.SavedGames.SavedGamesActivity"
+                    android:parentActivityName=".activities.HomeScreen.HomeScreenActivity">
+        </activity>
+        <activity   android:name=".activities.ChessBoard.ChessBoardActivity"
+                    android:parentActivityName=".activities.HomeScreen.HomeScreenActivity">
+        </activity>
     </application>
 
 </manifest>
