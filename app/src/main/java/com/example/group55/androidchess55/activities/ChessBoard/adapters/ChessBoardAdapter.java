@@ -17,10 +17,10 @@ import java.util.Map;
 public class ChessBoardAdapter extends android.widget.BaseAdapter{
 
     private Context mContext;
-    ChessPiece[][] board;
+    ChessPiece[] board;
     Map<String, Integer> map;
 
-    public ChessBoardAdapter(Context c, ChessPiece[][] board) {
+    public ChessBoardAdapter(Context c, ChessPiece[] board) {
         mContext = c;
         this.board = board;
         map = new HashMap<String, Integer>();
@@ -60,9 +60,7 @@ public class ChessBoardAdapter extends android.widget.BaseAdapter{
 
         //Set image
 
-        int row = position / 8;
-        int col = position % 8;
-        ChessPiece current_piece = board[row][col];
+        ChessPiece current_piece = board[position];
         if (current_piece != null) {
             imageView.setImageResource(map.get(current_piece.toString()));
         }

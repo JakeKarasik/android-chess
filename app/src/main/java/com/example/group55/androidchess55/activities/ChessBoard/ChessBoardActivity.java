@@ -17,6 +17,8 @@ import java.util.ArrayList;
 public class ChessBoardActivity extends AppCompatActivity {
 
     static ChessPiece[][] board;
+    static ChessPiece[] horizon_board;
+    static BaseAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +34,22 @@ public class ChessBoardActivity extends AppCompatActivity {
 
         //Create board
        board  = new ChessPiece[8][8];
+       horizon_board = new ChessPiece[64];
        initBoard();
 
-        BaseAdapter adapter = new ChessBoardAdapter(ChessBoardActivity.this, board);
-        GridView board_grid = (GridView)findViewById(R.id.board_grid);
-        board_grid.setAdapter(adapter);
+
+       adapter = new ChessBoardAdapter(ChessBoardActivity.this, horizon_board);
+       convertToHorizon();
+       GridView board_grid = (GridView)findViewById(R.id.board_grid);
+       board_grid.setAdapter(adapter);
     }
 
+    public static void convertToHorizon(){
+        for(int i = 0; i < 64; i++){
+            horizon_board[i] = board[i/8][i%8];
+        }
+        adapter.notifyDataSetChanged();
+    }
     /**
      * Converts a given string coordinate to its position on the board.
      *
