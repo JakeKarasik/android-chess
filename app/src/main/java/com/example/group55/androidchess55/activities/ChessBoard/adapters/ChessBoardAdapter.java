@@ -17,10 +17,10 @@ import java.util.Map;
 public class ChessBoardAdapter extends android.widget.BaseAdapter{
 
     private Context mContext;
-    ChessPiece[] board;
+    ChessPiece[][] board;
     Map<String, Integer> map;
 
-    public ChessBoardAdapter(Context c, ChessPiece[] board) {
+    public ChessBoardAdapter(Context c, ChessPiece[][] board) {
         mContext = c;
         this.board = board;
         map = new HashMap<String, Integer>();
@@ -59,7 +59,10 @@ public class ChessBoardAdapter extends android.widget.BaseAdapter{
         }
 
         //Set image
-        ChessPiece current_piece = board[position];
+
+        int row = position / 8;
+        int col = position % 8;
+        ChessPiece current_piece = board[row][col];
         if (current_piece != null) {
             imageView.setImageResource(map.get(current_piece.toString()));
         }
@@ -77,13 +80,13 @@ public class ChessBoardAdapter extends android.widget.BaseAdapter{
 
     private void setImageRefs() {
         map.put("bB", R.drawable.bb);
-        map.put("bH", R.drawable.bh);
+        map.put("bN", R.drawable.bh);
         map.put("bK", R.drawable.bk);
         map.put("bP", R.drawable.bp);
         map.put("bQ", R.drawable.bq);
         map.put("bR", R.drawable.br);
         map.put("wB", R.drawable.wb);
-        map.put("wH", R.drawable.wh);
+        map.put("wN", R.drawable.wh);
         map.put("wK", R.drawable.wk);
         map.put("wP", R.drawable.wp);
         map.put("wQ", R.drawable.wq);
