@@ -23,6 +23,7 @@ public class ChessBoardActivity extends AppCompatActivity {
     public static ChessPiece[][] board;
     static ChessPiece[] horizon_board;
     static BaseAdapter adapter;
+    static GridView board_grid;
     static boolean moving = false;
     static int prev_pos[] = new int[2];
     static ChessPiece prev_piece = null;
@@ -78,7 +79,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
         adapter = new ChessBoardAdapter(ChessBoardActivity.this, horizon_board);
         convertToHorizon();
-        GridView board_grid = findViewById(R.id.board_grid);
+        board_grid = findViewById(R.id.board_grid);
         board_grid.setAdapter(adapter);
 
         board_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -98,6 +99,7 @@ public class ChessBoardActivity extends AppCompatActivity {
                     //Log.d("stuff", Integer.toString(dest[0]) + "," + Integer.toString(dest[1]));
                     if(prev_piece.move(dest)){
                         convertToHorizon();
+                        board_grid.invalidateViews();
                         if(horizon_board[prev_pos[0]*8 + prev_pos[1]] == null){
                             Log.d("stuff", "null");
                         }
