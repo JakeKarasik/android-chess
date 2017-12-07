@@ -1,5 +1,7 @@
 package com.example.group55.androidchess55.models;
 
+import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
+
 import java.util.*;
 
 /**
@@ -110,19 +112,19 @@ public class Pawn extends ChessPiece {
             if (getColor() == 'w') {  delta = -1; } else {  delta = 1;  }
 
             // Right diagonal
-            if(     (Chess.board[dest[0]][dest[1]] == null) && // Null destination
+            if(     (ChessBoardActivity.board[dest[0]][dest[1]] == null) && // Null destination
                     (dest[0] == old_pos[0] + delta) && // Right diagonal
                     (dest[1] == old_pos[1] + delta)){
-                Chess.board[old_pos[0]][old_pos[1] + delta] = null;
+                ChessBoardActivity.board[old_pos[0]][old_pos[1] + delta] = null;
             }
             // Left diagonal
-            if(     (Chess.board[dest[0]][dest[1]] == null) && // Null destination
+            if(     (ChessBoardActivity.board[dest[0]][dest[1]] == null) && // Null destination
                     (dest[0] == old_pos[0] + delta) && // Right diagonal
                     (dest[1] == old_pos[1] - delta)){
-                Chess.board[old_pos[0]][old_pos[1] - delta] = null;
+                ChessBoardActivity.board[old_pos[0]][old_pos[1] - delta] = null;
             }
-            Chess.board[dest[0]][dest[1]] = this;
-            Chess.board[old_pos[0]][old_pos[1]] = null;
+            ChessBoardActivity.board[dest[0]][dest[1]] = this;
+            ChessBoardActivity.board[old_pos[0]][old_pos[1]] = null;
             setPos(dest);
 
             return true;

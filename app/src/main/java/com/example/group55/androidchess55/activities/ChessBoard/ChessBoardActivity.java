@@ -20,7 +20,7 @@ import java.util.LinkedList;
 
 public class ChessBoardActivity extends AppCompatActivity {
 
-    static ChessPiece[][] board;
+    public static ChessPiece[][] board;
     static ChessPiece[] horizon_board;
     static BaseAdapter adapter;
     static boolean moving = false;
@@ -92,8 +92,18 @@ public class ChessBoardActivity extends AppCompatActivity {
                     prev_piece = board[position/8][position%8];
                     moving = true;
                 }else if(moving){
-                    Log.d("stuff", prev_piece.toString() + "," + String.valueOf(moving));
-                    moving = false;
+                    int dest[] = new int[2];
+                    dest[0] = position/8;
+                    dest[1] = position%8;
+                    //Log.d("stuff", Integer.toString(dest[0]) + "," + Integer.toString(dest[1]));
+                    if(prev_piece.move(dest)){
+                        convertToHorizon();
+                        if(horizon_board[prev_pos[0]*8 + prev_pos[1]] == null){
+                            Log.d("stuff", "null");
+                        }
+                        Log.d("stuff", horizon_board[position].toString());
+                        moving = false;
+                    }
                 }
             }
         });

@@ -1,5 +1,7 @@
 package com.example.group55.androidchess55.models;
 
+import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
+
 import java.util.*;
 
 /**
@@ -276,15 +278,23 @@ public abstract class ChessPiece {
 	 * @return <code>true</code> if dest is valid and piece is moved.
 	 */
 	public boolean move(int[] dest) {
+		int[] old_pos = getPos();
+		ChessBoardActivity.board[dest[0]][dest[1]] = this;
+		ChessBoardActivity.board[old_pos[0]][old_pos[1]] = null;
+		setPos(dest);
+		setMoved(hasMoved() + 1);
+		return true;
+		/*
 		if (isValidMove(dest)) {
 			int[] old_pos = getPos();
-			Chess.board[dest[0]][dest[1]] = this;
-			Chess.board[old_pos[0]][old_pos[1]] = null;
+			ChessBoardActivity.board[dest[0]][dest[1]] = this;
+			ChessBoardActivity.board[old_pos[0]][old_pos[1]] = null;
 			setPos(dest);
 			setMoved(hasMoved() + 1);
 			return true;
 		}
 		return false;
+		*/
 	}
 
 	/**
