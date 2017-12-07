@@ -4,6 +4,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -13,12 +16,46 @@ import com.example.group55.androidchess55.activities.ChessBoard.adapters.ChessBo
 import com.example.group55.androidchess55.models.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class ChessBoardActivity extends AppCompatActivity {
 
     static ChessPiece[][] board;
     static ChessPiece[] horizon_board;
     static BaseAdapter adapter;
+    static boolean moving = false;
+    static int prev_pos[] = new int[2];
+    static ChessPiece prev_piece = null;
+    static char turn_color = '\0';
+    /**
+     * Initialize turn to 1.
+     */
+    static int turn = 1;
+    /**
+     * Set default promotion to Queen.
+     */
+    static char promotion = '\0';
+
+    /**
+     * Black King's current position.
+     */
+    static int[] black_king = new int[]{0,4};
+    /**
+     * White King's current position.
+     */
+    static int[] white_king = new int[]{7,4};
+    /**
+     * <code>true</code> if either Black or White King is in check.
+     */
+    static boolean isInCheck = false;
+    /**
+     * <code>true</code> when testing for safe zones for check.
+     */
+    static boolean zone_check_mode = false;
+    /**
+     * Contains valid coordinates for escaping check.
+     */
+    static LinkedList<int[]> escape_check;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,30 +63,53 @@ public class ChessBoardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_chess_board);
 
         //Setup toolbar
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Cancel Game");
         setSupportActionBar(myToolbar);
-        ActionBar ab = getSupportActionBar();
+        ActionBar ab = null;
+        while(ab == null){ ab = getSupportActionBar(); }
         ab.setDisplayHomeAsUpEnabled(true);
 
         //Create board
-       board  = new ChessPiece[8][8];
-       horizon_board = new ChessPiece[64];
-       initBoard();
+        board  = new ChessPiece[8][8];
+        horizon_board = new ChessPiece[64];
+        initBoard();
 
 
-       adapter = new ChessBoardAdapter(ChessBoardActivity.this, horizon_board);
-       convertToHorizon();
-       GridView board_grid = (GridView)findViewById(R.id.board_grid);
-       board_grid.setAdapter(adapter);
+        adapter = new ChessBoardAdapter(ChessBoardActivity.this, horizon_board);
+        convertToHorizon();
+        GridView board_grid = findViewById(R.id.board_grid);
+        board_grid.setAdapter(adapter);
+
+        board_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+
+                Log.d("stuff", String.valueOf(moving));
+                if(!moving && horizon_board[position] != null){
+                    prev_pos[0] = position / 8;
+                    prev_pos[1] = position % 8;
+                    prev_piece = board[position/8][position%8];
+                    moving = true;
+                }else if(moving){
+                    Log.d("stuff", prev_piece.toString() + "," + String.valueOf(moving));
+                    moving = false;
+                }
+            }
+        });
+
     }
 
+    /**
+     * Adapt 2D chessboard to 1D
+     */
     public static void convertToHorizon(){
         for(int i = 0; i < 64; i++){
             horizon_board[i] = board[i/8][i%8];
         }
         adapter.notifyDataSetChanged();
     }
+
     /**
      * Converts a given string coordinate to its position on the board.
      *
@@ -77,6 +137,10 @@ public class ChessBoardActivity extends AppCompatActivity {
         board[pos[0]][pos[1]] = piece;
         piece.setPos(pos);
     }
+
+    /**
+     * Initializes board with all the pieces for both Black and White in their correct starting positions.
+     */
     public static void initBoard() {
 
         // Place black pieces
@@ -117,13 +181,38 @@ public class ChessBoardActivity extends AppCompatActivity {
 
     }
 
-//    gridView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-//    {
-//        @Override
-//        public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-//        {
-//            String a = String.valueOf(position);
-//            Toast.makeText(getApplicationContext(), a, Toast.LENGTH_SHORT).show();
-//        }
-//    });
+    /**
+     * Given a piece returns a clone of it.
+     *
+     * @param item Piece to clone.
+     * @return Cloned piece.
+     */
+    public static ChessPiece cloner(ChessPiece item){
+        switch (item.getName()) {
+            case 'P':
+                return new Pawn(item);
+            case 'Q':
+                return new Queen(item);
+            case 'N':
+                return new Knight(item);
+            case 'B':
+                return new Bishop(item);
+            case 'R':
+                return new Rook(item);
+            case 'K':
+                return new King(item);
+            default:
+                return new Pawn(item);
+        }
+    }
+
+    /**
+     * Checks that the coordinates given are inside the bounds
+     *
+     * @param input Coordinates to check.
+     * @return <code>true</code> if input is within the bounds of the board.
+     */
+    public static boolean inBounds(int[] input){
+        return input[0] >= 0 && input[1] >= 0 && input[0] <= 7 && input[1] <= 7;
+    }
 }
