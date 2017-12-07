@@ -99,7 +99,7 @@ public class ChessBoardActivity extends AppCompatActivity {
                     //Log.d("stuff", Integer.toString(dest[0]) + "," + Integer.toString(dest[1]));
                     if(prev_piece.move(dest)){
                         convertToHorizon();
-                        board_grid.invalidateViews();
+                        board_grid.setAdapter(adapter);
                         if(horizon_board[prev_pos[0]*8 + prev_pos[1]] == null){
                             Log.d("stuff", "null");
                         }
