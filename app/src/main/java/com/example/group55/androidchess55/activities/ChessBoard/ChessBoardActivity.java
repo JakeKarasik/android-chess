@@ -1,21 +1,27 @@
 package com.example.group55.androidchess55.activities.ChessBoard;
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 
 import com.example.group55.androidchess55.R;
 import com.example.group55.androidchess55.activities.ChessBoard.adapters.ChessBoardAdapter;
-import com.example.group55.androidchess55.models.*;
+import com.example.group55.androidchess55.models.Bishop;
+import com.example.group55.androidchess55.models.ChessPiece;
+import com.example.group55.androidchess55.models.King;
+import com.example.group55.androidchess55.models.Knight;
+import com.example.group55.androidchess55.models.Pawn;
+import com.example.group55.androidchess55.models.Queen;
+import com.example.group55.androidchess55.models.Rook;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class ChessBoardActivity extends AppCompatActivity {
@@ -85,7 +91,6 @@ public class ChessBoardActivity extends AppCompatActivity {
         board_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-
                 Log.d("stuff", String.valueOf(moving));
                 if(!moving && horizon_board[position] != null){
                     prev_pos[0] = position / 8;
@@ -110,6 +115,28 @@ public class ChessBoardActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    /**
+     * Shows dialog to select newly promoted piece type.
+     */
+    public void promotePiece() {
+        AlertDialog.Builder d = new AlertDialog.Builder(ChessBoardActivity.this);
+        d.setCancelable(false);
+        d.setTitle("Select piece to promote to");
+        final CharSequence[] pieces = {"Rook", "Bishop", "Knight", "Queen"};
+        d.setItems(pieces, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                switch(pieces[i].toString()) {
+                    case "Rook": promotion = 'R'; break;
+                    case "Bishop": promotion = 'B'; break;
+                    case "Knight": promotion = 'N'; break;
+                    default: promotion = '\0';
+                }
+            }
+        });
+        d.create().show();
     }
 
     /**
