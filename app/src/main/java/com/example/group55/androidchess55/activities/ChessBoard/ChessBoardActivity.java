@@ -38,15 +38,14 @@ public class ChessBoardActivity extends AppCompatActivity {
     static ChessPiece prev_piece = null;
     static char turn_color = '\0';
 
+    static boolean canUndo = false;
+    public static boolean castled = false;
+    public static boolean promoted = false;
+
     /**
      * Initialize turn to 1.
      */
     public static int turn = 1;
-
-    /**
-     * Set default promotion to Queen.
-     */
-    static char promotion = '\0';
 
     /**
      * Black King's current position.
@@ -79,7 +78,6 @@ public class ChessBoardActivity extends AppCompatActivity {
 		prev_piece = null;
 		turn_color = '\0';
     	turn = 1;
-    	promotion = '\0';
 		black_king = new int[]{0,4};
 		white_king = new int[]{7,4};
 		isInCheck = false;
@@ -176,21 +174,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
                         // Check for promotion
                         if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
-                            switch(promotion){
-                                case 'N':
-                                    placePiece(dest, new Knight(turn_color));
-                                    break;
-                                case 'B':
-                                    placePiece(dest, new Bishop(turn_color));
-                                    break;
-                                case 'R':
-                                    placePiece(dest, new Rook(turn_color));
-                                    break;
-                                default:
-                                    placePiece(dest, new Queen(turn_color));
-                                    break;
-                            }
-                            promotion = '\0';
+                        	promotePiece(dest);
                         }
 
                         // Update board state
@@ -210,27 +194,27 @@ public class ChessBoardActivity extends AppCompatActivity {
 
                         // Check if a king has been placed in check
                         if (!ChessPiece.isSafe(white_king, 'w')) {
+                        	if(turn_color == 'w'){
+                        		undo();
+                        		return;
+							}
                             isInCheck = true;
                             if (board[white_king[0]][white_king[1]].mateChecker()) {
-                                System.out.println("\n");
-                                System.out.println("Checkmate");
-                                System.out.println();
-                                System.out.println("Black wins");
-                                System.exit(0);
-                            }
-                            System.out.println("\n");
-                            System.out.print("Check");
+                                endGameNotification("Checkmate, Black Wins!");
+                            }else{
+								showNotification("Check");
+							}
                         } else if (!ChessPiece.isSafe(black_king, 'b')) {
+                        	if(turn_color == 'b'){
+                        		undo();
+                        		return;
+							}
                             isInCheck = true;
                             if (board[black_king[0]][black_king[1]].mateChecker()) {
-                                System.out.println("\n");
-                                System.out.println("Checkmate");
-                                System.out.println();
-                                System.out.print("White wins");
-                                System.exit(0);
-                            }
-                            System.out.println("\n");
-                            System.out.print("Check");
+                                endGameNotification("Checkmate, White Wins!");
+                            }else{
+								showNotification("Check");
+							}
                         } else {
                             isInCheck = false;
                         }
@@ -244,7 +228,7 @@ public class ChessBoardActivity extends AppCompatActivity {
     /**
      * Shows dialog to select newly promoted piece type.
      */
-    public void promotePiece() {
+    public void promotePiece(final int dest[]) {
         AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setCancelable(false);
         d.setTitle("Select piece to promote to");
@@ -253,11 +237,21 @@ public class ChessBoardActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 switch(pieces[i].toString()) {
-                    case "Rook": promotion = 'R'; break;
-                    case "Bishop": promotion = 'B'; break;
-                    case "Knight": promotion = 'N'; break;
-                    default: promotion = '\0';
+                    case "Rook":
+						placePiece(dest, new Rook(turn_color));
+						break;
+                    case "Bishop":
+						placePiece(dest, new Bishop(turn_color));
+						break;
+                    case "Knight":
+                    	placePiece(dest, new Knight(turn_color));
+                    	break;
+                    default:
+						placePiece(dest, new Queen(turn_color));
+						break;
                 }
+				convertToHorizon();
+				board_grid.setAdapter(adapter);
             }
         });
         d.create().show();
@@ -532,4 +526,21 @@ public class ChessBoardActivity extends AppCompatActivity {
     public static boolean inBounds(int[] input){
         return input[0] >= 0 && input[1] >= 0 && input[0] <= 7 && input[1] <= 7;
     }
+
+    public void undo(){
+    	// Undo previous move
+		if(castled){
+			castled = false;
+			canUndo = false;
+		}
+		if(promoted){
+			promoted = false;
+			canUndo = false;
+		}
+
+    	// Update board state
+		turn--;
+		convertToHorizon();
+		board_grid.setAdapter(adapter);
+	}
 }

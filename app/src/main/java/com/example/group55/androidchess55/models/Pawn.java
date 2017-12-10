@@ -93,6 +93,24 @@ public class Pawn extends ChessPiece {
         pawnDiag(move, delta);
     }
 
+    public void listUpdateNoSpec(){
+        int origin[] = getPos();
+        int delta;
+        if(getColor() == 'w'){  delta = -1; }else{  delta = 1;  }
+
+        // Clear and start from empty
+        possible_moves =  new LinkedList<>();
+        int move[] = new int[2];
+
+        // Can move diagonally
+        move[0] = origin[0] + delta;
+        move[1] = origin[1] + delta;
+        pawnDiag(move, delta);
+        move[0] = origin[0] + delta;
+        move[1] = origin[1] - delta;
+        pawnDiag(move, delta);
+    }
+
     /* (non-Javadoc)
      * @see chess.ChessPiece#move(int[])
      */

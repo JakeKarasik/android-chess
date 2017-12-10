@@ -1,5 +1,7 @@
 package com.example.group55.androidchess55.models;
 
+import android.util.Log;
+
 import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
 
 import java.util.LinkedList;
@@ -97,7 +99,6 @@ public class King extends ChessPiece {
 			
 			if (ChessBoardActivity.inBounds(move)) {
                 ChessPiece dest_piece = ChessBoardActivity.board[move[0]][move[1]];
-
                 //If moves are valid, add to list, if it would put itself in check, cannot make that move
                 if (ChessBoardActivity.zone_check_mode) {
                     possible_moves.add(move.clone());

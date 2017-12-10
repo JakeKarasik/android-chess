@@ -210,7 +210,6 @@ public abstract class ChessPiece {
 
             }
         }
-        //printPossibleEscapes();
         return ( ChessBoardActivity.escape_check.size() == 0);
     }
     /**
@@ -231,12 +230,15 @@ public abstract class ChessPiece {
                    (i != target[0] || j != target[1])) { // Not same piece
 
                     // Prevent looping, update move lists
-                    if (piece.getName() != 'K') {
+                    if (piece.getName() != 'K' && piece.getName() != 'P') {
                         piece.listUpdate();
-                    } else {
+                    } else if(piece.getName() == 'K') {
                         King temp_king = (King)piece;
                         temp_king.listUpdateNoSpec();
-                    }
+                    } else if(piece.getName() == 'P') {
+                    	Pawn temp_pawn = (Pawn)piece;
+                    	temp_pawn.listUpdateNoSpec();
+					}
 
 	                if (piece.possible_moves.size() != 0) {
 	                    for (int[] item : piece.possible_moves) {
@@ -294,25 +296,4 @@ public abstract class ChessPiece {
 	 */
 	public abstract void listUpdate();
 
-	/**
-	 * Print possible moves for piece for debugging.
-	 */
-	public void printPossibleMoves() {
-		for (int i = 0;i<possible_moves.size();i++) {
-			int[] curr = possible_moves.get(i);
-			int[] curr_pos = this.getPos();
-			System.out.println(this.toString() + "[" +curr_pos[0]+","+curr_pos[1]+"] possible move: "+curr[0]+","+curr[1]);
-		}
-	}
-	
-	/**
-	 * Print possible escapes for a piece for debugging.
-	 */
-	public void printPossibleEscapes() {
-        for (int i = 0;i<ChessBoardActivity.escape_check.size();i++) {
-            int[] curr = ChessBoardActivity.escape_check.get(i);
-            int[] curr_pos = this.getPos();
-            System.out.println(this.toString() + "[" +curr_pos[0]+","+curr_pos[1]+"] possible escape: "+curr[0]+","+curr[1]);
-        }
-    }
 }
