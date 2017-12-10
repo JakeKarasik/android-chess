@@ -56,7 +56,7 @@ public abstract class ChessPiece {
         color = piece.color;
         setPos(piece.getPos().clone());
         has_moved = piece.has_moved;
-        listUpdate();
+        //listUpdate();
     }
 	
 	/**
@@ -148,6 +148,7 @@ public abstract class ChessPiece {
                     (!isEnemyOf(friend)) &&           // Same color
                     (friend.getName() != 'K')){       // Not same piece (king)
 
+					int saveHasMoved = friend.hasMoved();
                     // Update list of moves for friendly piece
                     friend.listUpdate();
 
@@ -192,6 +193,7 @@ public abstract class ChessPiece {
                             // Revert move
                             ChessBoardActivity.board[cloned_origin.getPos()[0]][cloned_origin.getPos()[1]] = friend;
                             friend.setPos(cloned_origin.getPos());
+                            friend.setMoved(saveHasMoved);
 
 
                             ChessBoardActivity.board[item[0]][item[1]] = cloned_dest;

@@ -91,8 +91,8 @@ public class ChessBoardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-    	reset();
         super.onCreate(savedInstanceState);
+		reset();
         setContentView(R.layout.activity_chess_board);
 
         // Setup toolbar
@@ -172,13 +172,14 @@ public class ChessBoardActivity extends AppCompatActivity {
 
                     // On successful move sync board and update GridView
                     if(     prev_piece != null &&
-                            prev_piece.move(dest) &&
-                            prev_piece.getColor() == turn_color &&
-                            pass){
+							prev_piece.getColor() == turn_color &&
+							pass &&
+                            prev_piece.move(dest)){
 
                         // Check for promotion
                         if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
                         	promotePiece(dest);
+                        	return;
                         }
 
                         // Update board state
@@ -198,6 +199,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
                         // Check if a king has been placed in check
                         if (!ChessPiece.isSafe(white_king, 'w')) {
+
                         	if(turn_color == 'w'){
                         		canUndo = true;
                         		undo(null);
@@ -210,10 +212,13 @@ public class ChessBoardActivity extends AppCompatActivity {
 								showNotification("Check");
 							}
                         } else if (!ChessPiece.isSafe(black_king, 'b')) {
+
                         	if(turn_color == 'b'){
+                        		canUndo = true;
                         		undo(null);
                         		return;
 							}
+
                             isInCheck = true;
                             if (board[black_king[0]][black_king[1]].mateChecker()) {
                                 endGameNotification("Checkmate, White Wins!");
@@ -259,6 +264,55 @@ public class ChessBoardActivity extends AppCompatActivity {
                 }
 				convertToHorizon();
 				board_grid.setAdapter(adapter);
+
+				// Update board state
+				convertToHorizon();
+				board_grid.setAdapter(adapter);
+				turn++;
+				moving = false;
+
+				// If a king is moved, update it's global position
+				if (prev_piece.getName() == 'K') {
+					if (prev_piece.getColor() == 'w') {
+						white_king = dest.clone();
+					} else {
+						black_king = dest.clone();
+					}
+				}
+
+				// Check if a king has been placed in check
+				if (!ChessPiece.isSafe(white_king, 'w')) {
+
+					if(turn_color == 'w'){
+						canUndo = true;
+						undo(null);
+						return;
+					}
+					isInCheck = true;
+					if (board[white_king[0]][white_king[1]].mateChecker()) {
+						endGameNotification("Checkmate, Black Wins!");
+					}else{
+						showNotification("Check");
+					}
+				} else if (!ChessPiece.isSafe(black_king, 'b')) {
+
+					if(turn_color == 'b'){
+						canUndo = true;
+						undo(null);
+						return;
+					}
+
+					isInCheck = true;
+					if (board[black_king[0]][black_king[1]].mateChecker()) {
+						endGameNotification("Checkmate, White Wins!");
+					}else{
+						showNotification("Check");
+					}
+				} else {
+					isInCheck = false;
+				}
+
+				canUndo = true;
             }
         });
         d.create().show();
