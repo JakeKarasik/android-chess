@@ -90,10 +90,10 @@ public class ChessBoardActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-    	reset();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chess_board);
+
+        reset();
 
         // Setup toolbar
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
@@ -416,6 +416,10 @@ public class ChessBoardActivity extends AppCompatActivity {
     public void forfeit(View v) {
         String caller_color = turn % 2 == 0 ? "Black" : "White";
         endGameNotification(caller_color + " has forfeited.");
+    }
+
+    public void moveAI() {
+
     }
 
     /**
