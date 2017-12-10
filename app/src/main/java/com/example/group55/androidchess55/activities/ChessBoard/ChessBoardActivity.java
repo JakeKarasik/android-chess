@@ -128,8 +128,6 @@ public class ChessBoardActivity extends AppCompatActivity {
 
     public void makeMove(int position) {
 
-        getBoardState();
-
         turn_color = (turn % 2 == 0) ? 'b' : 'w';
 
                 /*
@@ -141,11 +139,13 @@ public class ChessBoardActivity extends AppCompatActivity {
                  *
                  * User is currently moving a piece to a different position
                  */
+
         if(		!moving &&
                 horizon_board[position] != null &&
                 horizon_board[position].getColor() == turn_color){
 
             // Set the previous move globals to allow undoing
+			getBoardState();
             prev_pos[0] = position / 8;
             prev_pos[1] = position % 8;
             prev_piece = board[position/8][position%8];
