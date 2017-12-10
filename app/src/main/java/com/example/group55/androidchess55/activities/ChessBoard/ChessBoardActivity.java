@@ -30,9 +30,10 @@ import java.util.LinkedList;
 public class ChessBoardActivity extends AppCompatActivity {
 
     public static ChessPiece[][] board;
+    static ChessPiece[][] prev_board;
     static ChessPiece[] horizon_board;
     static BaseAdapter adapter;
-    static GridView board_grid;
+    GridView board_grid;
     static boolean moving = false;
     static int prev_pos[] = new int[2];
     static ChessPiece prev_piece = null;
@@ -41,6 +42,7 @@ public class ChessBoardActivity extends AppCompatActivity {
     static boolean canUndo = false;
     public static boolean castled = false;
     public static boolean promoted = false;
+    static ChessPiece takenPiece = null;
 
     /**
      * Initialize turn to 1.
@@ -51,6 +53,7 @@ public class ChessBoardActivity extends AppCompatActivity {
      * Black King's current position.
      */
     static int[] black_king = new int[]{0,4};
+
 
     /**
      * White King's current position.
@@ -116,6 +119,7 @@ public class ChessBoardActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id){
 
+            	getBoardState();
 
 				turn_color = (turn % 2 == 0) ? 'b' : 'w';
 
@@ -195,7 +199,8 @@ public class ChessBoardActivity extends AppCompatActivity {
                         // Check if a king has been placed in check
                         if (!ChessPiece.isSafe(white_king, 'w')) {
                         	if(turn_color == 'w'){
-                        		undo();
+                        		canUndo = true;
+                        		undo(null);
                         		return;
 							}
                             isInCheck = true;
@@ -206,7 +211,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 							}
                         } else if (!ChessPiece.isSafe(black_king, 'b')) {
                         	if(turn_color == 'b'){
-                        		undo();
+                        		undo(null);
                         		return;
 							}
                             isInCheck = true;
@@ -218,6 +223,8 @@ public class ChessBoardActivity extends AppCompatActivity {
                         } else {
                             isInCheck = false;
                         }
+
+                        canUndo = true;
                     }
                 }
             }
@@ -527,20 +534,34 @@ public class ChessBoardActivity extends AppCompatActivity {
         return input[0] >= 0 && input[1] >= 0 && input[0] <= 7 && input[1] <= 7;
     }
 
-    public void undo(){
-    	// Undo previous move
-		if(castled){
-			castled = false;
-			canUndo = false;
-		}
-		if(promoted){
-			promoted = false;
-			canUndo = false;
+    public void getBoardState(){
+    	prev_board = new ChessPiece[8][8];
+    	for(int i = 0; i < 8; i++){
+    		for(int j = 0; j < 8; j++){
+    			if(board[i][j] != null){
+					prev_board[i][j] = cloner(board[i][j]);
+				}
+			}
 		}
 
-    	// Update board state
-		turn--;
-		convertToHorizon();
-		board_grid.setAdapter(adapter);
+	}
+
+
+	public void undo(View v){
+    	if(canUndo){
+			for(int i = 0; i < 8; i++){
+				for(int j = 0; j < 8; j++){
+					if(prev_board[i][j] != null){
+						board[i][j] = cloner(prev_board[i][j]);
+					}else{
+						board[i][j] = null;
+					}
+				}
+			}
+			turn--;
+			convertToHorizon();
+			board_grid.setAdapter(adapter);
+			canUndo = false;
+		}
 	}
 }

@@ -80,7 +80,9 @@ public class Pawn extends ChessPiece {
             move[0] = origin[0] + 2*delta;
             move[1] = origin[1];
             // And within bounds and not blocked
-            if(ChessBoardActivity.inBounds(move) && ChessBoardActivity.board[move[0]][move[1]] == null && hasMoved() == 0){
+            if(		ChessBoardActivity.inBounds(move) &&
+					ChessBoardActivity.board[move[0]][move[1]] == null &&
+					hasMoved() == 0){
                 possible_moves.add(move.clone());
             }
         }
