@@ -92,9 +92,7 @@ public class ChessBoardActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		reset();
         setContentView(R.layout.activity_chess_board);
-
         reset();
 
         // Setup toolbar
@@ -157,7 +155,7 @@ public class ChessBoardActivity extends AppCompatActivity {
                     horizon_board[position].getColor() == turn_color)
             {
                 prev_piece = horizon_board[position];
-                prev_pos[0] = position/8;
+                prev_pos[0] = position / 8;
                 prev_pos[1] = position % 8;
                 return;
             }
@@ -178,17 +176,18 @@ public class ChessBoardActivity extends AppCompatActivity {
                 }
             }
 
-            // On successful move sync board and update GridView
+            // If we have selected our own piece and it passes
             if(     prev_piece != null &&
                     prev_piece.getColor() == turn_color &&
-                    pass){
+                    pass    ){
 
-                if(prev_piece.isValidMove(dest)){
-                    getBoardState();
-                    prev_piece.move(dest);
-                }else{
-                    return;
-                }
+                // Check that move is valid
+                if(!prev_piece.isValidMove(dest)) { return; }
+
+                // Copy board and move
+                getBoardState();
+                prev_piece.move(dest);
+
                 // Check for promotion
                 if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
                     promotePiece(dest);
@@ -222,7 +221,7 @@ public class ChessBoardActivity extends AppCompatActivity {
                     if (board[white_king[0]][white_king[1]].mateChecker()) {
                         endGameNotification("Checkmate, Black Wins!");
                     }else{
-                        showNotification("Check");
+                        showNotification("White King in Check");
                     }
                 } else if (!ChessPiece.isSafe(black_king, 'b')) {
 
@@ -236,7 +235,7 @@ public class ChessBoardActivity extends AppCompatActivity {
                     if (board[black_king[0]][black_king[1]].mateChecker()) {
                         endGameNotification("Checkmate, White Wins!");
                     }else{
-                        showNotification("Check");
+                        showNotification("Black King in Check");
                     }
                 } else {
                     isInCheck = false;
@@ -272,8 +271,6 @@ public class ChessBoardActivity extends AppCompatActivity {
 						placePiece(dest, new Queen(turn_color));
 						break;
                 }
-				convertToHorizon();
-				board_grid.setAdapter(adapter);
 
 				// Update board state
 				convertToHorizon();
@@ -640,6 +637,8 @@ public class ChessBoardActivity extends AppCompatActivity {
      */
 	public void undo(View v){
     	if(canUndo){
+
+    	    // Copy over previous board to current board
 			for(int i = 0; i < 8; i++){
 				for(int j = 0; j < 8; j++){
 					if(prev_board[i][j] != null){
@@ -649,17 +648,29 @@ public class ChessBoardActivity extends AppCompatActivity {
 					}
 				}
 			}
+
+			// Update global states
 			turn--;
 			convertToHorizon();
 			board_grid.setAdapter(adapter);
 			canUndo = false;
 
+			// Verify check states
             if (!ChessPiece.isSafe(white_king, 'w')) {
                 isInCheck = true;
-                showNotification("Check");
+                if (board[white_king[0]][white_king[1]].mateChecker()) {
+                    endGameNotification("Checkmate, Black Wins!");
+                }else{
+                    showNotification("White King in Check");
+                }
             } else if (!ChessPiece.isSafe(black_king, 'b')) {
                 isInCheck = true;
-                showNotification("Check");
+                isInCheck = true;
+                if (board[black_king[0]][black_king[1]].mateChecker()) {
+                    endGameNotification("Checkmate, White Wins!");
+                }else{
+                    showNotification("Black King in Check");
+                }
             } else {
                 isInCheck = false;
             }
