@@ -26,6 +26,7 @@ import com.example.group55.androidchess55.models.Queen;
 import com.example.group55.androidchess55.models.Rook;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class ChessBoardActivity extends AppCompatActivity {
 
@@ -119,10 +120,17 @@ public class ChessBoardActivity extends AppCompatActivity {
         board_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+                makeMove(position);
+            }
+        });
 
-            	getBoardState();
+    }
 
-				turn_color = (turn % 2 == 0) ? 'b' : 'w';
+    public void makeMove(int position) {
+
+        getBoardState();
+
+        turn_color = (turn % 2 == 0) ? 'b' : 'w';
 
                 /*
                  * If user is not currently moving a piece &&
@@ -133,109 +141,106 @@ public class ChessBoardActivity extends AppCompatActivity {
                  *
                  * User is currently moving a piece to a different position
                  */
-                if(		!moving &&
-						horizon_board[position] != null &&
-						horizon_board[position].getColor() == turn_color){
+        if(		!moving &&
+                horizon_board[position] != null &&
+                horizon_board[position].getColor() == turn_color){
 
-                    // Set the previous move globals to allow undoing
-                    prev_pos[0] = position / 8;
-                    prev_pos[1] = position % 8;
-                    prev_piece = board[position/8][position%8];
-                    moving = true;
+            // Set the previous move globals to allow undoing
+            prev_pos[0] = position / 8;
+            prev_pos[1] = position % 8;
+            prev_piece = board[position/8][position%8];
+            moving = true;
 
-                }else if(moving){
+        }else if(moving){
 
-                	// If user selected another of his own pieces, change selected piece
-                	if(		horizon_board[position] != null &&
-							horizon_board[position].getColor() == turn_color)
-					{
-                		prev_piece = horizon_board[position];
-						prev_pos[0] = position/8;
-						prev_pos[1] = position % 8;
-						return;
-					}
+            // If user selected another of his own pieces, change selected piece
+            if(		horizon_board[position] != null &&
+                    horizon_board[position].getColor() == turn_color)
+            {
+                prev_piece = horizon_board[position];
+                prev_pos[0] = position/8;
+                prev_pos[1] = position % 8;
+                return;
+            }
 
-                    // Set destination coordinates in 2D
-                    int dest[] = new int[2];
-                    dest[0] = position/8;
-                    dest[1] = position%8;
+            // Set destination coordinates in 2D
+            int dest[] = new int[2];
+            dest[0] = position/8;
+            dest[1] = position%8;
 
-                    // Check that if player is in check (not mate), move will let him escape
-                    boolean pass = true;
-                    if (isInCheck) {
-                        pass = false;
-                        for (int[] item : escape_check) {
-                            if (Arrays.equals(item,dest)) {
-                                pass = true;
-                            }
-                        }
-                    }
-
-                    // On successful move sync board and update GridView
-                    if(     prev_piece != null &&
-							prev_piece.getColor() == turn_color &&
-							pass &&
-                            prev_piece.move(dest)){
-
-                        // Check for promotion
-                        if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
-                        	promotePiece(dest);
-                        	return;
-                        }
-
-                        // Update board state
-                        convertToHorizon();
-                        board_grid.setAdapter(adapter);
-                        turn++;
-                        moving = false;
-
-                        // If a king is moved, update it's global position
-                        if (prev_piece.getName() == 'K') {
-                            if (prev_piece.getColor() == 'w') {
-                                white_king = dest.clone();
-                            } else {
-                                black_king = dest.clone();
-                            }
-                        }
-
-                        // Check if a king has been placed in check
-                        if (!ChessPiece.isSafe(white_king, 'w')) {
-
-                        	if(turn_color == 'w'){
-                        		canUndo = true;
-                        		undo(null);
-                        		return;
-							}
-                            isInCheck = true;
-                            if (board[white_king[0]][white_king[1]].mateChecker()) {
-                                endGameNotification("Checkmate, Black Wins!");
-                            }else{
-								showNotification("Check");
-							}
-                        } else if (!ChessPiece.isSafe(black_king, 'b')) {
-
-                        	if(turn_color == 'b'){
-                        		canUndo = true;
-                        		undo(null);
-                        		return;
-							}
-
-                            isInCheck = true;
-                            if (board[black_king[0]][black_king[1]].mateChecker()) {
-                                endGameNotification("Checkmate, White Wins!");
-                            }else{
-								showNotification("Check");
-							}
-                        } else {
-                            isInCheck = false;
-                        }
-
-                        canUndo = true;
+            // Check that if player is in check (not mate), move will let him escape
+            boolean pass = true;
+            if (isInCheck) {
+                pass = false;
+                for (int[] item : escape_check) {
+                    if (Arrays.equals(item,dest)) {
+                        pass = true;
                     }
                 }
             }
-        });
 
+            // On successful move sync board and update GridView
+            if(     prev_piece != null &&
+                    prev_piece.getColor() == turn_color &&
+                    pass &&
+                    prev_piece.move(dest)){
+
+                // Check for promotion
+                if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
+                    promotePiece(dest);
+                    return;
+                }
+
+                // Update board state
+                convertToHorizon();
+                board_grid.setAdapter(adapter);
+                turn++;
+                moving = false;
+
+                // If a king is moved, update it's global position
+                if (prev_piece.getName() == 'K') {
+                    if (prev_piece.getColor() == 'w') {
+                        white_king = dest.clone();
+                    } else {
+                        black_king = dest.clone();
+                    }
+                }
+
+                // Check if a king has been placed in check
+                if (!ChessPiece.isSafe(white_king, 'w')) {
+
+                    if(turn_color == 'w'){
+                        canUndo = true;
+                        undo(null);
+                        return;
+                    }
+                    isInCheck = true;
+                    if (board[white_king[0]][white_king[1]].mateChecker()) {
+                        endGameNotification("Checkmate, Black Wins!");
+                    }else{
+                        showNotification("Check");
+                    }
+                } else if (!ChessPiece.isSafe(black_king, 'b')) {
+
+                    if(turn_color == 'b'){
+                        canUndo = true;
+                        undo(null);
+                        return;
+                    }
+
+                    isInCheck = true;
+                    if (board[black_king[0]][black_king[1]].mateChecker()) {
+                        endGameNotification("Checkmate, White Wins!");
+                    }else{
+                        showNotification("Check");
+                    }
+                } else {
+                    isInCheck = false;
+                }
+
+                canUndo = true;
+            }
+        }
     }
 
     /**
@@ -467,14 +472,33 @@ public class ChessBoardActivity extends AppCompatActivity {
 
     /**
      * End game, called by forfeit button
+     *
+     * @param v View calling forfeit
      */
     public void forfeit(View v) {
         String caller_color = turn % 2 == 0 ? "Black" : "White";
         endGameNotification(caller_color + " has forfeited.");
     }
 
-    public void moveAI() {
-
+    /**
+     * Randomly move a piece on AI move button press
+     *
+     * @param v View calling moveAI
+     */
+    public void moveAI(View v) {
+        if (prev_piece != null) {
+            prev_piece.listUpdate();
+            LinkedList<int[]> possible_moves = prev_piece.possible_moves;
+            if (possible_moves.size() > 0) {
+                int choice = new Random().nextInt(possible_moves.size());
+                int[] selected_move = possible_moves.get(choice); // (row*8) + col
+                makeMove((selected_move[0]*8)+selected_move[1]);
+            } else {
+                showNotification("This piece has no valid moves.");
+            }
+        } else {
+            showNotification("Please select a piece to move first.");
+        }
     }
 
     /**
@@ -605,7 +629,11 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 	}
 
-
+    /**
+     * Undo last move made.
+     *
+     * @param v View calling undo
+     */
 	public void undo(View v){
     	if(canUndo){
 			for(int i = 0; i < 8; i++){
