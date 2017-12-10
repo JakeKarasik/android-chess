@@ -653,7 +653,16 @@ public class ChessBoardActivity extends AppCompatActivity {
 			convertToHorizon();
 			board_grid.setAdapter(adapter);
 			canUndo = false;
-			if(isInCheck){ isInCheck = false; }
+
+            if (!ChessPiece.isSafe(white_king, 'w')) {
+                isInCheck = true;
+                showNotification("Check");
+            } else if (!ChessPiece.isSafe(black_king, 'b')) {
+                isInCheck = true;
+                showNotification("Check");
+            } else {
+                isInCheck = false;
+            }
 		}
 	}
 }
