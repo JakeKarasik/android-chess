@@ -362,7 +362,7 @@ public class ChessBoardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String title =  edittext.getText().toString().trim();
-                if (title != null && !title.isEmpty()) {
+                if (!title.isEmpty()) {
                     // Do stuff to save game...
 
                     // Close dialog, end chessboard activity and send back to homescreen
