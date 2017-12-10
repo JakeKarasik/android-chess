@@ -1,6 +1,7 @@
 package com.example.group55.androidchess55.activities.ChessBoard;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -10,10 +11,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.GridView;
 
 import com.example.group55.androidchess55.R;
 import com.example.group55.androidchess55.activities.ChessBoard.adapters.ChessBoardAdapter;
+import com.example.group55.androidchess55.activities.HomeScreen.HomeScreenActivity;
 import com.example.group55.androidchess55.models.Bishop;
 import com.example.group55.androidchess55.models.ChessPiece;
 import com.example.group55.androidchess55.models.King;
@@ -121,7 +124,7 @@ public class ChessBoardActivity extends AppCompatActivity {
      * Shows dialog to select newly promoted piece type.
      */
     public void promotePiece() {
-        AlertDialog.Builder d = new AlertDialog.Builder(ChessBoardActivity.this);
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
         d.setCancelable(false);
         d.setTitle("Select piece to promote to");
         final CharSequence[] pieces = {"Rook", "Bishop", "Knight", "Queen"};
@@ -137,6 +140,160 @@ public class ChessBoardActivity extends AppCompatActivity {
             }
         });
         d.create().show();
+    }
+
+    /**
+     * Show dialog with given text.
+     *
+     * @param msg Message to display in dialog.
+     */
+    public void showNotification(String msg) {
+        // Setup basic dialog properties
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setCancelable(false);
+        d.setMessage(msg);
+
+        // Create OK button
+        d.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+
+        // Display dialog
+        d.create().show();
+    }
+
+    /**
+     * Show end of game results in dialog with option to save game.
+     *
+     * @param msg Message to display in dialog.
+     */
+    public void endGameNotification(String msg) {
+        // Setup basic dialog properties
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setCancelable(false);
+        d.setMessage(msg);
+        d.setTitle("Game over!");
+
+        // Create return to home button
+        d.setPositiveButton("Return to home", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // Close dialog, end chessboard activity and send back to homescreen
+                dialog.cancel();
+                Intent intent = new Intent(ChessBoardActivity.this, HomeScreenActivity.class);
+                finish();
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+
+        // Create save game button
+        d.setNeutralButton("Save Game", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+                saveGame();
+            }
+        });
+
+        // Display dialog
+        d.create().show();
+    }
+
+    /**
+     * Display dialog to save game with given title
+     */
+    public void saveGame() {
+        // Setup basic dialog properties
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setCancelable(false);
+        d.setTitle("Enter game title");
+
+        // Create title text box
+        final EditText edittext = new EditText(this);
+        d.setView(edittext);
+
+        // Setup save button
+        d.setPositiveButton("Save", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {} // Gets over written later
+        });
+
+        // Setup cancel button
+        d.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // Close dialog, end chessboard activity and send back to homescreen
+                dialog.cancel();
+                Intent intent = new Intent(ChessBoardActivity.this, HomeScreenActivity.class);
+                finish();
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+
+        // Save created dialog for save button overwriting
+        final AlertDialog dialog = d.create();
+
+        // Show dialog
+        dialog.show();
+
+        // Overwrites save button onclick to stop it from closing on empty input
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String title =  edittext.getText().toString().trim();
+                if (title != null && !title.isEmpty()) {
+                    // Do stuff to save game...
+
+                    // Close dialog, end chessboard activity and send back to homescreen
+                    dialog.cancel();
+                    Intent intent = new Intent(ChessBoardActivity.this, HomeScreenActivity.class);
+                    finish();
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                }
+            }
+        });
+    }
+
+    /**
+     * Create dialog to ask for draw
+     *
+     * @param v View calling confirm
+     */
+    public void confirmDraw(View v) {
+        // Setup basic dialog properties
+        AlertDialog.Builder d = new AlertDialog.Builder(this);
+        d.setCancelable(false);
+        String caller_color = turn % 2 == 0 ? "Black" : "White";
+        d.setMessage(caller_color + " has requested a draw.");
+        d.setTitle("Draw Requested");
+
+        // Create return to home button
+        d.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // Close dialog, call endgame dialog
+                dialog.cancel();
+                endGameNotification("Draw!");
+            }
+        });
+
+        // Create save game button
+        d.setNegativeButton("Decline", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+
+        // Display dialog
+        d.create().show();
+    }
+
+    /**
+     * End game, called by forfeit button
+     */
+    public void forfeit(View v) {
+        String caller_color = turn % 2 == 0 ? "Black" : "White";
+        endGameNotification(caller_color + " has forfeited.");
     }
 
     /**

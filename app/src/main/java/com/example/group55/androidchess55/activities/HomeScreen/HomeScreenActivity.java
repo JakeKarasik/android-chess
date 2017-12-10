@@ -23,7 +23,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     public void startNewGame(View v) {
         Intent chessboard_intent = new Intent(HomeScreenActivity.this, ChessBoardActivity.class);
         //myIntent.putExtra("key", value); //Optional parameters
-        v.getContext().startActivity(chessboard_intent);
+        startActivity(chessboard_intent);
     }
 
 
