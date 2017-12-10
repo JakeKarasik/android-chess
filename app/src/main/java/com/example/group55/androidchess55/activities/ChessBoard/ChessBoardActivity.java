@@ -145,7 +145,6 @@ public class ChessBoardActivity extends AppCompatActivity {
                 horizon_board[position].getColor() == turn_color){
 
             // Set the previous move globals to allow undoing
-			getBoardState();
             prev_pos[0] = position / 8;
             prev_pos[1] = position % 8;
             prev_piece = board[position/8][position%8];
@@ -182,9 +181,14 @@ public class ChessBoardActivity extends AppCompatActivity {
             // On successful move sync board and update GridView
             if(     prev_piece != null &&
                     prev_piece.getColor() == turn_color &&
-                    pass &&
-                    prev_piece.move(dest)){
+                    pass){
 
+                if(prev_piece.isValidMove(dest)){
+                    getBoardState();
+                    prev_piece.move(dest);
+                }else{
+                    return;
+                }
                 // Check for promotion
                 if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
                     promotePiece(dest);
