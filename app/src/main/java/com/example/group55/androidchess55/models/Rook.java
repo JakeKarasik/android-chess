@@ -1,5 +1,7 @@
 package com.example.group55.androidchess55.models;
 
+import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
+
 import java.util.LinkedList;
 
 /**
@@ -42,14 +44,14 @@ public class Rook extends ChessPiece {
         for (int[] bop : delta) {
             int move[] = { origin[0] + bop [0] , origin[1] + bop [1] };
 
-            while(Chess.inBounds(move)){
-                ChessPiece dest_piece = Chess.board[move[0]][move[1]];
+            while(ChessBoardActivity.inBounds(move)){
+                ChessPiece dest_piece = ChessBoardActivity.board[move[0]][move[1]];
                 // If space is empty, can move to it
                 if(dest_piece == null ){
                     possible_moves.add(move.clone());
                 }
                 // If found enemy, max distance reached, break out
-                if(dest_piece != null && (isEnemyOf(dest_piece) || Chess.zone_check_mode)){
+                if(dest_piece != null && (isEnemyOf(dest_piece) || ChessBoardActivity.zone_check_mode)){
                     possible_moves.add(move.clone());
                     break;
                 }

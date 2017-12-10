@@ -1,5 +1,7 @@
 package com.example.group55.androidchess55.models;
 
+import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
+
 import java.util.LinkedList;
 
 /**
@@ -53,12 +55,12 @@ public class Knight extends ChessPiece {
 
         for(int[] move : standard_moves){
 
-            if (Chess.inBounds(move)) {
+            if (ChessBoardActivity.inBounds(move)) {
 
-                ChessPiece dest_piece = Chess.board[move[0]][move[1]];
+                ChessPiece dest_piece = ChessBoardActivity.board[move[0]][move[1]];
 
                 //If moves are valid, add to list
-                if (dest_piece == null || isEnemyOf(dest_piece) || Chess.zone_check_mode) {
+                if (dest_piece == null || isEnemyOf(dest_piece) || ChessBoardActivity.zone_check_mode) {
                     possible_moves.add(move.clone());
                 }
             }

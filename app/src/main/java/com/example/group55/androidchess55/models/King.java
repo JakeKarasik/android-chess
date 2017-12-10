@@ -1,5 +1,7 @@
 package com.example.group55.androidchess55.models;
 
+import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
+
 import java.util.LinkedList;
 
 /**
@@ -59,10 +61,10 @@ public class King extends ChessPiece {
 
 		for (int[] move : standard_moves) {
 
-			if (Chess.inBounds(move)) {
-				ChessPiece dest_piece = Chess.board[move[0]][move[1]];
+			if (ChessBoardActivity.inBounds(move)) {
+				ChessPiece dest_piece = ChessBoardActivity.board[move[0]][move[1]];
 				//If moves are within bounds
-                if (Chess.zone_check_mode) {
+                if (ChessBoardActivity.zone_check_mode) {
                     possible_moves.add(move.clone());
                 }else if ((dest_piece == null || isEnemyOf(dest_piece))) {
 					possible_moves.add(move.clone());
@@ -93,11 +95,11 @@ public class King extends ChessPiece {
 		
 		for (int[] move : standard_moves) {
 			
-			if (Chess.inBounds(move)) {
-                ChessPiece dest_piece = Chess.board[move[0]][move[1]];
+			if (ChessBoardActivity.inBounds(move)) {
+                ChessPiece dest_piece = ChessBoardActivity.board[move[0]][move[1]];
 
                 //If moves are valid, add to list, if it would put itself in check, cannot make that move
-                if (Chess.zone_check_mode) {
+                if (ChessBoardActivity.zone_check_mode) {
                     possible_moves.add(move.clone());
                 // Either safe or enemy, AND the move won't land king in danger
                 } else if ((dest_piece == null || isEnemyOf(dest_piece)) && ChessPiece.isSafe(move, getColor())) {
@@ -130,8 +132,8 @@ public class King extends ChessPiece {
 		
 		LinkedList<int[]> results = new LinkedList<int[]>();
 
-		left_rook_pos = Chess.board[row][0];
-		right_rook_pos = Chess.board[row][7];		
+		left_rook_pos = ChessBoardActivity.board[row][0];
+		right_rook_pos = ChessBoardActivity.board[row][7];		
 		
 		// Check if piece is rook and has never moved
 		if (left_rook_pos != null && 
@@ -141,7 +143,7 @@ public class King extends ChessPiece {
 			boolean left_safe = true;
 			for (int i = 0; i < 3; i++) {
 				int[] test_spot = {row, i + 1};
-				if (Chess.board[row][i + 1] != null || !isSafe(test_spot, getColor())) {
+				if (ChessBoardActivity.board[row][i + 1] != null || !isSafe(test_spot, getColor())) {
 					left_safe = false;
 					break;
 				}
@@ -159,7 +161,7 @@ public class King extends ChessPiece {
 			boolean right_safe = true;
 			for (int i = 0; i < 2; i++) {
 				int[] test_spot = {row, i + 5};
-				if (Chess.board[row][i + 5] != null || !isSafe(test_spot, getColor())) {
+				if (ChessBoardActivity.board[row][i + 5] != null || !isSafe(test_spot, getColor())) {
 					right_safe = false;
 					break;
 				}
@@ -213,7 +215,7 @@ public class King extends ChessPiece {
 		if (isValidMove(dest)) {
 			
 			//Set new pos to this piece
-			Chess.board[dest[0]][dest[1]] = this;
+			ChessBoardActivity.board[dest[0]][dest[1]] = this;
 			
 			//If is castling, get final location of castle
 
@@ -221,26 +223,26 @@ public class King extends ChessPiece {
 				int[] cfp = castleFinalPos(dest);
 				
 				if (cfp[1] == 3) { //left
-					ChessPiece left_rook = Chess.board[row][0];
+					ChessPiece left_rook = ChessBoardActivity.board[row][0];
 					
 					//Set new pos to this piece
-					Chess.board[cfp[0]][cfp[1]] = left_rook;
+					ChessBoardActivity.board[cfp[0]][cfp[1]] = left_rook;
 					
 					//Clear old spot
-					Chess.board[row][0] = null;
+					ChessBoardActivity.board[row][0] = null;
 					
 					left_rook.setPos(cfp);
 					left_rook.listUpdate();
 					left_rook.setMoved(left_rook.hasMoved()+1);
 					
 				} else { //right
-					ChessPiece right_rook = Chess.board[row][7];
+					ChessPiece right_rook = ChessBoardActivity.board[row][7];
 					
 					//Set new pos to this piece
-					Chess.board[cfp[0]][cfp[1]] = right_rook;
+					ChessBoardActivity.board[cfp[0]][cfp[1]] = right_rook;
 					
 					//Clear old spot
-					Chess.board[row][7] = null;
+					ChessBoardActivity.board[row][7] = null;
 					
 					right_rook.setPos(cfp);
 					right_rook.listUpdate();
@@ -250,7 +252,7 @@ public class King extends ChessPiece {
 
 			
 			//Clear old location
-			Chess.board[old_pos[0]][old_pos[1]] = null;
+			ChessBoardActivity.board[old_pos[0]][old_pos[1]] = null;
 			
 			//Save new pos
 			setPos(dest);

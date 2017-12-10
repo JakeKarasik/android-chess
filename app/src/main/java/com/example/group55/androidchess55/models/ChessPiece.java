@@ -129,20 +129,20 @@ public abstract class ChessPiece {
     public boolean mateChecker(){
 
 	    // Keep track of possible escape moves
-        Chess.escape_check = new LinkedList<>();
+        ChessBoardActivity.escape_check = new LinkedList<>();
 
         // Update and check if there are any possible moves
 	    listUpdate();
 
 	    // Add all valid moves by the King
-        if (possible_moves.size() != 0) { Chess.escape_check.addAll(possible_moves); }
+        if (possible_moves.size() != 0) { ChessBoardActivity.escape_check.addAll(possible_moves); }
 
 
         // Iterate through the board looking your friends
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                ChessPiece friend = Chess.board[i][j];
+                ChessPiece friend = ChessBoardActivity.board[i][j];
 
                 if ((friend != null) &&               // Not null
                     (!isEnemyOf(friend)) &&           // Same color
@@ -159,24 +159,24 @@ public abstract class ChessPiece {
                         for (int[] item : friend.possible_moves) {
 
                             // Clone the pieces, pawn used for special case
-                            ChessPiece cloned_origin = Chess.cloner(friend); // A copy of our friendly piece
+                            ChessPiece cloned_origin = ChessBoardActivity.cloner(friend); // A copy of our friendly piece
                             ChessPiece cloned_dest; // A copy of our destination
                             ChessPiece cloned_pawn = null; // A copy of our pawn for enpassant
 
                             // SPECIAL CASE: ENPASSANT
                             if	(friend.getName() == 'P' &&                  // Is a pawn
-                                 Chess.board[item[0]][item[1]] == null &&    // Moving to empty space
+                                 ChessBoardActivity.board[item[0]][item[1]] == null &&    // Moving to empty space
                                  friend.getPos()[1] != item[1]) {               // diagonally
                                     
-                                int delta = (Chess.turn % 2 == 0) ? 1 : -1;
-                                cloned_pawn = new Pawn(Chess.board[item[0] - delta][item[1]]);
+                                int delta = (ChessBoardActivity.turn % 2 == 0) ? 1 : -1;
+                                cloned_pawn = new Pawn(ChessBoardActivity.board[item[0] - delta][item[1]]);
                                 cloned_dest = null;
                                 friend.move(item);
 
-                            } else if (Chess.board[item[0]][item[1]] != null) {
+                            } else if (ChessBoardActivity.board[item[0]][item[1]] != null) {
                                 // Clone our friendly piece and the piece it can take, then move
-                                ChessPiece toClone = Chess.board[item[0]][item[1]];
-                                cloned_dest = Chess.cloner(toClone);
+                                ChessPiece toClone = ChessBoardActivity.board[item[0]][item[1]];
+                                cloned_dest = ChessBoardActivity.cloner(toClone);
                                 friend.move(item);
 
                             } else {
@@ -187,21 +187,21 @@ public abstract class ChessPiece {
 
                             // Check if this breaks check
                             if (isSafe(pos, color)) {
-                                Chess.escape_check.add(item.clone());
+                                ChessBoardActivity.escape_check.add(item.clone());
                             }
                             // Revert move
-                            Chess.board[cloned_origin.getPos()[0]][cloned_origin.getPos()[1]] = friend;
+                            ChessBoardActivity.board[cloned_origin.getPos()[0]][cloned_origin.getPos()[1]] = friend;
                             friend.setPos(cloned_origin.getPos());
 
 
-                            Chess.board[item[0]][item[1]] = cloned_dest;
+                            ChessBoardActivity.board[item[0]][item[1]] = cloned_dest;
                             if(cloned_dest != null) {
-                                Chess.board[item[0]][item[1]].setPos(cloned_dest.getPos());
+                                ChessBoardActivity.board[item[0]][item[1]].setPos(cloned_dest.getPos());
                             }
 
                             if (cloned_pawn != null) {
-                                Chess.board[cloned_pawn.getPos()[0]][cloned_pawn.getPos()[1]] = cloned_pawn;
-                                Chess.board[cloned_pawn.getPos()[0]][cloned_pawn.getPos()[1]].setPos(cloned_pawn.getPos());
+                                ChessBoardActivity.board[cloned_pawn.getPos()[0]][cloned_pawn.getPos()[1]] = cloned_pawn;
+                                ChessBoardActivity.board[cloned_pawn.getPos()[0]][cloned_pawn.getPos()[1]].setPos(cloned_pawn.getPos());
                             }
                         }
                     }
@@ -211,7 +211,7 @@ public abstract class ChessPiece {
             }
         }
         //printPossibleEscapes();
-        return ( Chess.escape_check.size() == 0);
+        return ( ChessBoardActivity.escape_check.size() == 0);
     }
     /**
      * Checks if a given space is safe from the enemy color.
@@ -222,11 +222,11 @@ public abstract class ChessPiece {
      */
     public static boolean isSafe(int[] target, char color) {
 
-        Chess.zone_check_mode = true;
+        ChessBoardActivity.zone_check_mode = true;
 
 	    for (int i = 0; i < 8; i++) {
 	        for (int j = 0; j < 8; j++) {
-	            ChessPiece piece = Chess.board[i][j];
+	            ChessPiece piece = ChessBoardActivity.board[i][j];
 	            if (piece != null && piece.getColor() != color && // Not null or same color
                    (i != target[0] || j != target[1])) { // Not same piece
 
@@ -241,7 +241,7 @@ public abstract class ChessPiece {
 	                if (piece.possible_moves.size() != 0) {
 	                    for (int[] item : piece.possible_moves) {
 	                        if (Arrays.equals(item,target)) {
-	                            Chess.zone_check_mode = false;
+	                            ChessBoardActivity.zone_check_mode = false;
 	                            return false;
                             }
                         }
@@ -250,7 +250,7 @@ public abstract class ChessPiece {
             }
         }
 
-        Chess.zone_check_mode = false;
+        ChessBoardActivity.zone_check_mode = false;
         return true;
     }
 
@@ -278,13 +278,6 @@ public abstract class ChessPiece {
 	 * @return <code>true</code> if dest is valid and piece is moved.
 	 */
 	public boolean move(int[] dest) {
-		int[] old_pos = getPos();
-		ChessBoardActivity.board[dest[0]][dest[1]] = this;
-		ChessBoardActivity.board[old_pos[0]][old_pos[1]] = null;
-		setPos(dest);
-		setMoved(hasMoved() + 1);
-		return true;
-		/*
 		if (isValidMove(dest)) {
 			int[] old_pos = getPos();
 			ChessBoardActivity.board[dest[0]][dest[1]] = this;
@@ -294,7 +287,6 @@ public abstract class ChessPiece {
 			return true;
 		}
 		return false;
-		*/
 	}
 
 	/**
@@ -317,8 +309,8 @@ public abstract class ChessPiece {
 	 * Print possible escapes for a piece for debugging.
 	 */
 	public void printPossibleEscapes() {
-        for (int i = 0;i<Chess.escape_check.size();i++) {
-            int[] curr = Chess.escape_check.get(i);
+        for (int i = 0;i<ChessBoardActivity.escape_check.size();i++) {
+            int[] curr = ChessBoardActivity.escape_check.get(i);
             int[] curr_pos = this.getPos();
             System.out.println(this.toString() + "[" +curr_pos[0]+","+curr_pos[1]+"] possible escape: "+curr[0]+","+curr[1]);
         }

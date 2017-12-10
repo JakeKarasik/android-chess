@@ -17,13 +17,13 @@ import java.util.Map;
 public class ChessBoardAdapter extends android.widget.BaseAdapter{
 
     private Context mContext;
-    ChessPiece[] board;
-    Map<String, Integer> map;
+    private ChessPiece[] board;
+    private Map<String, Integer> map;
 
     public ChessBoardAdapter(Context c, ChessPiece[] board) {
         mContext = c;
         this.board = board;
-        map = new HashMap<String, Integer>();
+        map = new HashMap<>();
         setImageRefs();
     }
 
@@ -44,28 +44,29 @@ public class ChessBoardAdapter extends android.widget.BaseAdapter{
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
-        if (convertView == null) {  // if it's not recycled, initialize some attributes
-            imageView = new ImageView(mContext);
 
-            //Set size of image
+        // Create an ImageView to display chessboard
+        ImageView imageView;
+
+        // If it's not recycled, initialize some attributes
+        if (convertView == null) {
+            imageView = new ImageView(mContext);
             WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
             DisplayMetrics metrics = new DisplayMetrics();
-            wm.getDefaultDisplay().getMetrics(metrics);
+            if(wm != null){ wm.getDefaultDisplay().getMetrics(metrics); }else{ return null; }
             int screen_width = metrics.widthPixels;
             imageView.setLayoutParams(new GridView.LayoutParams((screen_width/8), (screen_width/8)));
         } else {
             imageView = (ImageView) convertView;
         }
 
-        //Set image
-
+        // Set image
         ChessPiece current_piece = board[position];
         if (current_piece != null) {
             imageView.setImageResource(map.get(current_piece.toString()));
         }
 
-        //Set background color of space
+        // Set background color of space
         int calc_pos = (position % 8) + (position / 8);
         if (calc_pos % 2 == 0) {
             imageView.setBackgroundColor(Color.parseColor("#FFCE9E"));

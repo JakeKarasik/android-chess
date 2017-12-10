@@ -16,6 +16,7 @@ import com.example.group55.androidchess55.activities.ChessBoard.adapters.ChessBo
 import com.example.group55.androidchess55.models.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class ChessBoardActivity extends AppCompatActivity {
@@ -28,10 +29,12 @@ public class ChessBoardActivity extends AppCompatActivity {
     static int prev_pos[] = new int[2];
     static ChessPiece prev_piece = null;
     static char turn_color = '\0';
+
     /**
      * Initialize turn to 1.
      */
-    static int turn = 1;
+    public static int turn = 1;
+
     /**
      * Set default promotion to Queen.
      */
@@ -41,29 +44,49 @@ public class ChessBoardActivity extends AppCompatActivity {
      * Black King's current position.
      */
     static int[] black_king = new int[]{0,4};
+
     /**
      * White King's current position.
      */
     static int[] white_king = new int[]{7,4};
+
     /**
      * <code>true</code> if either Black or White King is in check.
      */
     static boolean isInCheck = false;
+
     /**
      * <code>true</code> when testing for safe zones for check.
      */
-    static boolean zone_check_mode = false;
+    public static boolean zone_check_mode = false;
+
     /**
      * Contains valid coordinates for escaping check.
      */
-    static LinkedList<int[]> escape_check;
+    public static LinkedList<int[]> escape_check;
+
+    public void reset(){
+		moving = false;
+		prev_pos = new int[2];
+		prev_piece = null;
+		turn_color = '\0';
+    	turn = 1;
+    	promotion = '\0';
+		black_king = new int[]{0,4};
+		white_king = new int[]{7,4};
+		isInCheck = false;
+		zone_check_mode = false;
+		escape_check = null;
+	}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+    	reset();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chess_board);
 
-        //Setup toolbar
+        // Setup toolbar
         Toolbar myToolbar = findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Cancel Game");
         setSupportActionBar(myToolbar);
@@ -71,40 +94,137 @@ public class ChessBoardActivity extends AppCompatActivity {
         while(ab == null){ ab = getSupportActionBar(); }
         ab.setDisplayHomeAsUpEnabled(true);
 
-        //Create board
+        // Create board and initialize
         board  = new ChessPiece[8][8];
         horizon_board = new ChessPiece[64];
         initBoard();
 
-
+        // Display board
         adapter = new ChessBoardAdapter(ChessBoardActivity.this, horizon_board);
         convertToHorizon();
         board_grid = findViewById(R.id.board_grid);
         board_grid.setAdapter(adapter);
 
+        // Set action on user input
         board_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id){
 
-                Log.d("stuff", String.valueOf(moving));
-                if(!moving && horizon_board[position] != null){
+				turn_color = (turn % 2 == 0) ? 'b' : 'w';
+
+                /*
+                 * If user is not currently moving a piece &&
+                 * the selected position is not null &&
+                 * the selected piece is the current player's piece
+                 *
+                 * else
+                 *
+                 * User is currently moving a piece to a different position
+                 */
+                if(		!moving &&
+						horizon_board[position] != null &&
+						horizon_board[position].getColor() == turn_color){
+
+                    // Set the previous move globals to allow undoing
                     prev_pos[0] = position / 8;
                     prev_pos[1] = position % 8;
                     prev_piece = board[position/8][position%8];
                     moving = true;
+
                 }else if(moving){
+
+                	// If user selected another of his own pieces, change selected piece
+                	if(		horizon_board[position] != null &&
+							horizon_board[position].getColor() == turn_color)
+					{
+                		prev_piece = horizon_board[position];
+						prev_pos[0] = position/8;
+						prev_pos[1] = position % 8;
+						return;
+					}
+
+                    // Set destination coordinates in 2D
                     int dest[] = new int[2];
                     dest[0] = position/8;
                     dest[1] = position%8;
-                    //Log.d("stuff", Integer.toString(dest[0]) + "," + Integer.toString(dest[1]));
-                    if(prev_piece.move(dest)){
+
+                    // Check that if player is in check (not mate), move will let him escape
+                    boolean pass = true;
+                    if (isInCheck) {
+                        pass = false;
+                        for (int[] item : escape_check) {
+                            if (Arrays.equals(item,dest)) {
+                                pass = true;
+                            }
+                        }
+                    }
+
+                    // On successful move sync board and update GridView
+                    if(     prev_piece != null &&
+                            prev_piece.move(dest) &&
+                            prev_piece.getColor() == turn_color &&
+                            pass){
+
+                        // Check for promotion
+                        if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
+                            switch(promotion){
+                                case 'N':
+                                    placePiece(dest, new Knight(turn_color));
+                                    break;
+                                case 'B':
+                                    placePiece(dest, new Bishop(turn_color));
+                                    break;
+                                case 'R':
+                                    placePiece(dest, new Rook(turn_color));
+                                    break;
+                                default:
+                                    placePiece(dest, new Queen(turn_color));
+                                    break;
+                            }
+                            promotion = '\0';
+                        }
+
+                        // Update board state
                         convertToHorizon();
                         board_grid.setAdapter(adapter);
-                        if(horizon_board[prev_pos[0]*8 + prev_pos[1]] == null){
-                            Log.d("stuff", "null");
-                        }
-                        Log.d("stuff", horizon_board[position].toString());
+                        turn++;
                         moving = false;
+
+                        // If a king is moved, update it's global position
+                        if (prev_piece.getName() == 'K') {
+                            if (prev_piece.getColor() == 'w') {
+                                white_king = dest.clone();
+                            } else {
+                                black_king = dest.clone();
+                            }
+                        }
+
+                        // Check if a king has been placed in check
+                        if (!ChessPiece.isSafe(white_king, 'w')) {
+                            isInCheck = true;
+                            if (board[white_king[0]][white_king[1]].mateChecker()) {
+                                System.out.println("\n");
+                                System.out.println("Checkmate");
+                                System.out.println();
+                                System.out.println("Black wins");
+                                System.exit(0);
+                            }
+                            System.out.println("\n");
+                            System.out.print("Check");
+                        } else if (!ChessPiece.isSafe(black_king, 'b')) {
+                            isInCheck = true;
+                            if (board[black_king[0]][black_king[1]].mateChecker()) {
+                                System.out.println("\n");
+                                System.out.println("Checkmate");
+                                System.out.println();
+                                System.out.print("White wins");
+                                System.exit(0);
+                            }
+                            System.out.println("\n");
+                            System.out.print("Check");
+                        } else {
+                            isInCheck = false;
+                        }
                     }
                 }
             }

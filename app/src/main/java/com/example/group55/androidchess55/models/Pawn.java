@@ -38,18 +38,18 @@ public class Pawn extends ChessPiece {
      * @param delta Determines direction based on color of piece.
      */
     private void pawnDiag(int move[], int delta){
-        if(Chess.inBounds(move)) {
+        if(ChessBoardActivity.inBounds(move)) {
 
-            if( Chess.zone_check_mode ){
+            if( ChessBoardActivity.zone_check_mode ){
                 possible_moves.add(move.clone());
                 // If there's a piece, it can be captured
-            }else if(Chess.board[move[0]][move[1]] != null && Chess.board[move[0]][move[1]].isEnemyOf(this)) {
+            }else if(ChessBoardActivity.board[move[0]][move[1]] != null && ChessBoardActivity.board[move[0]][move[1]].isEnemyOf(this)) {
                 possible_moves.add(move.clone());
                 // Check for enpassant
-            }else if(   Chess.board[move[0] - delta][move[1]] != null &&
-                        Chess.board[move[0] - delta][move[1]].getName() == getName() &&
-                        Chess.board[move[0] - delta][move[1]].getColor() != getColor() &&
-                        Chess.turn - Chess.board[move[0] - delta][move[1]].hasMoved() == 1){
+            }else if(   ChessBoardActivity.board[move[0] - delta][move[1]] != null &&
+                        ChessBoardActivity.board[move[0] - delta][move[1]].getName() == getName() &&
+                        ChessBoardActivity.board[move[0] - delta][move[1]].getColor() != getColor() &&
+                        ChessBoardActivity.turn - ChessBoardActivity.board[move[0] - delta][move[1]].hasMoved() == 1){
 
                 possible_moves.add(move.clone());
             }
@@ -73,14 +73,14 @@ public class Pawn extends ChessPiece {
         move[0] = origin[0] + delta;
         move[1] = origin[1];
         // And within bounds
-        if(Chess.inBounds(move) && Chess.board[move[0]][move[1]] == null){
+        if(ChessBoardActivity.inBounds(move) && ChessBoardActivity.board[move[0]][move[1]] == null){
             // Clone object and add to LinkedList
             possible_moves.add(move.clone());
             // Can move forward two spaces
             move[0] = origin[0] + 2*delta;
             move[1] = origin[1];
             // And within bounds and not blocked
-            if(Chess.inBounds(move) && Chess.board[move[0]][move[1]] == null && hasMoved() == 0){
+            if(ChessBoardActivity.inBounds(move) && ChessBoardActivity.board[move[0]][move[1]] == null && hasMoved() == 0){
                 possible_moves.add(move.clone());
             }
         }
@@ -103,7 +103,7 @@ public class Pawn extends ChessPiece {
 
             // If moving by two, open it up to enpassant
             if (Math.abs(dest[0] - old_pos[0]) == 2) {
-                setMoved(Chess.turn);
+                setMoved(ChessBoardActivity.turn);
             } else {
                 setMoved(-2);
             }
