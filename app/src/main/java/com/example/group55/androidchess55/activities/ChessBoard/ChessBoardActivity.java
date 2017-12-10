@@ -649,6 +649,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 			convertToHorizon();
 			board_grid.setAdapter(adapter);
 			canUndo = false;
+			if(isInCheck){ isInCheck = false; }
 		}
 	}
 }
