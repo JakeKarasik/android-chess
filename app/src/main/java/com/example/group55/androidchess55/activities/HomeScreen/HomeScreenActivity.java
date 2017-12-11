@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.example.group55.androidchess55.R;
 import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
+import com.example.group55.androidchess55.activities.SavedGames.SavedGamesActivity;
 
 public class HomeScreenActivity extends AppCompatActivity {
 
@@ -21,10 +22,14 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     public void startNewGame(View v) {
-        Intent chessboard_intent = new Intent(HomeScreenActivity.this, ChessBoardActivity.class);
+        Intent intent = new Intent(HomeScreenActivity.this, ChessBoardActivity.class);
         //myIntent.putExtra("key", value); //Optional parameters
-        startActivity(chessboard_intent);
+        startActivity(intent);
     }
 
+    public void viewSavedGames(View v) {
+        Intent intent = new Intent(HomeScreenActivity.this, SavedGamesActivity.class);
+        startActivity(intent);
+    }
 
 }
