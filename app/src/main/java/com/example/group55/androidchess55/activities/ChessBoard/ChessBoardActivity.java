@@ -1,5 +1,6 @@
 package com.example.group55.androidchess55.activities.ChessBoard;
 
+import android.content.Context;
 import android.util.Log;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -19,7 +20,12 @@ import com.example.group55.androidchess55.activities.ChessBoard.adapters.ChessBo
 import com.example.group55.androidchess55.activities.HomeScreen.HomeScreenActivity;
 import com.example.group55.androidchess55.models.*;
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -116,6 +122,11 @@ public class ChessBoardActivity extends AppCompatActivity {
 	static boolean isInCheck = false;
 
 	/**
+	 * List of all boards in game
+	 */
+	static LinkedList<ChessPiece[]> recording = new LinkedList<ChessPiece[]>();
+
+	/**
 	 * Resets board to default state when called.
 	 */
 	public void reset() {
@@ -139,6 +150,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 		black_king = new int[]{0, 4};
 		white_king = new int[]{7, 4};
 		isInCheck = false;
+		recording = new LinkedList<>();
 	}
 
 	/**
@@ -248,6 +260,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 				// Update board state
 				convertToHorizon();
+				recording.add(horizon_board.clone());
 				board_grid.setAdapter(adapter);
 				turn++;
 				moving = false;
@@ -542,18 +555,56 @@ public class ChessBoardActivity extends AppCompatActivity {
 	 * @param v View calling moveAI
 	 */
 	public void moveAI(View v) {
-		if (prev_piece != null) {
-			prev_piece.listUpdate();
-			LinkedList<int[]> possible_moves = prev_piece.possible_moves;
-			if (possible_moves.size() > 0) {
-				int choice = new Random().nextInt(possible_moves.size());
-				int[] selected_move = possible_moves.get(choice); // (row*8) + col
-				makeMove((selected_move[0] * 8) + selected_move[1]);
-			} else {
-				showNotification("This piece has no valid moves.");
+		// Get current turn color
+		char curr_color = (turn % 2 == 0) ? 'b' : 'w';
+		// Choose random starting point
+		int start_pos = new Random().nextInt(64);
+
+		int i;
+		for (i = start_pos; i < 64; i++) {
+			// If not null, matching color and has available moves...
+			ChessPiece curr_piece = horizon_board[i];
+			if (curr_piece != null && curr_piece.getColor() == curr_color) {
+				curr_piece.listUpdate();
+				// If has possible moves, move this piece!
+				if (curr_piece.possible_moves.size() > 0) {
+					break;
+				}
 			}
-		} else {
-			showNotification("Please select a piece to move first.");
+			// No match was found... start from the top
+			if (i == 63) {
+				i = -1;
+			}
+		}
+
+		// Set the previous move globals to allow undoing
+		prev_pos[0] = i / 8;
+		prev_pos[1] = i % 8;
+		prev_piece = board[i/8][i%8];
+		moving = true;
+
+		// At this point should have at least 1 possible move
+		LinkedList<int[]> possible_moves = prev_piece.possible_moves;
+		int choice = new Random().nextInt(possible_moves.size());
+		int[] selected_move = possible_moves.get(choice);
+		makeMove((selected_move[0]*8)+selected_move[1]);
+	}
+
+	public boolean saveRecording(String title) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+		Calendar current_dt = Calendar.getInstance();
+		String current_dt_str = dateFormat.format(current_dt);
+
+		try{
+			// Write list of Users, converted to ArrayList to allow serialization
+			FileOutputStream fos = openFileOutput(title+"~"+current_dt_str+".ser", Context.MODE_PRIVATE);
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+			oos.writeObject(recording);
+			oos.close();
+
+			return true;
+		}catch(Exception e){
+			return false;
 		}
 	}
 
@@ -703,6 +754,9 @@ public class ChessBoardActivity extends AppCompatActivity {
 					}
 				}
 			}
+
+			// Remove last board since it was undone
+			recording.removeLast();
 
 			// Update global states
 			turn--;
