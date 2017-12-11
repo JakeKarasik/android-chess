@@ -241,15 +241,7 @@ public abstract class ChessPiece implements Serializable {
 					piece.listUpdate();
 	                if (piece.possible_moves.size() != 0) {
 	                    for (int[] item : piece.possible_moves) {
-	                    	/*
-	                    	if(piece.getName() == 'Q' && piece.getColor() == 'w' && piece.getPos()[0] == 0){
-	                    		Log.d("stuff", Integer.toString(item[0]) + "," + Integer.toString(item[1]));
-							}*/
 	                        if (Arrays.equals(item,target)) {
-								if(piece.getName() == 'Q' && piece.getColor() == 'w' && piece.getPos()[0] == 0){
-									Log.d("stuff", "HI" + Integer.toString(item[0]) + Integer.toString(item[1])
-									+ Integer.toString(target[0]) + Integer.toString(target[1]));
-								}
 	                            ChessBoardActivity.zone_check_mode = false;
 	                            return false;
                             }

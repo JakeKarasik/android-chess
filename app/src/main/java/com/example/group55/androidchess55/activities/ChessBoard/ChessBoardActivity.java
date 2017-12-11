@@ -55,7 +55,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 	static boolean canUndo = false;
 	static int[] black_king = new int[]{0, 4};
 	static int[] white_king = new int[]{7, 4};
-	static boolean isInCheck = false;
+	public static boolean isInCheck = false;
 
 	// Resets board to default state when called
 	public void reset() {
@@ -573,9 +573,9 @@ public class ChessBoardActivity extends AppCompatActivity {
 				if (!title.isEmpty()) {
 					// Do stuff to save game...
 					if (saveRecording(title)) {
-						Log.d("SAVE STATUS", "SAVED");
+						//Log.d("SAVE STATUS", "SAVED");
 					} else {
-						Log.d("SAVE STATUS", "FAILED TO SAVE");
+						//Log.d("SAVE STATUS", "FAILED TO SAVE");
 					}
 					// Close dialog, end chessboard activity and send back to homescreen
 					dialog.cancel();
@@ -643,7 +643,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 			return true;
 		}catch(Exception e){
-			Log.d("savedRecording()", "failed", e);
+			//Log.d("savedRecording()", "failed", e);
 			return false;
 		}
 	}

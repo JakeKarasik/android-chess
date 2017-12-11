@@ -80,7 +80,7 @@ public class King extends ChessPiece {
 			}
 		}
 
-		if(ChessBoardActivity.zone_check_mode){ return; }
+		if(ChessBoardActivity.zone_check_mode || ChessBoardActivity.isInCheck){ return; }
 		
 		//If can castle, add possible moves to list
 		if(hasMoved() == 0  && !isInCheck()){

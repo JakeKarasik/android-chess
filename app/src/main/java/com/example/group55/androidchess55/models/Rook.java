@@ -53,6 +53,11 @@ public class Rook extends ChessPiece {
                 // If found enemy, max distance reached, break out
                 if(dest_piece != null && (isEnemyOf(dest_piece) || ChessBoardActivity.zone_check_mode)){
                     possible_moves.add(move.clone());
+					if(dest_piece.getName() == 'K' && isEnemyOf(dest_piece)){
+						move[0] = move[0] + bop[0];
+						move[1] = move[1] + bop[1];
+						possible_moves.add(move.clone());
+					}
                     break;
                 }
                 // If found ally, can't move there, break out
