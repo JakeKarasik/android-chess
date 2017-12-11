@@ -1,8 +1,6 @@
 package com.example.group55.androidchess55.activities.ChessBoard;
 
 import android.content.Context;
-import android.icu.text.SimpleDateFormat;
-import android.icu.util.Calendar;
 import android.util.Log;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,9 +22,12 @@ import com.example.group55.androidchess55.models.*;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Random;
 
 public class ChessBoardActivity extends AppCompatActivity {
@@ -606,7 +607,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 	public boolean saveRecording(String title) {
 		Date today = Calendar.getInstance().getTime();
-		String current_dt = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(today);
+		String current_dt = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss", Locale.US).format(today);
 		try{
 			// Save game to ser file
 			FileOutputStream fos = openFileOutput(title+"~"+current_dt+".ser", Context.MODE_PRIVATE);

@@ -11,9 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.group55.androidchess55.R;
-import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
 import com.example.group55.androidchess55.activities.GameReplay.GameReplayActivity;
-import com.example.group55.androidchess55.activities.HomeScreen.HomeScreenActivity;
 import com.example.group55.androidchess55.activities.SavedGames.adapters.SavedGamesAdapter;
 import com.example.group55.androidchess55.models.SavedGameInfo;
 

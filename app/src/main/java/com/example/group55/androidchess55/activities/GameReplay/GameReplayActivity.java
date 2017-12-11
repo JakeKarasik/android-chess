@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 
@@ -51,9 +50,7 @@ public class GameReplayActivity  extends AppCompatActivity {
             boards = (LinkedList<ChessPiece[]>)is.readObject();
             is.close();
             fis.close();
-        } catch (Exception e) {
-            Log.d("Failed to load replay", "",e);
-        }
+        } catch (Exception e) {}
     }
 
     public void prevMove(View v) {
