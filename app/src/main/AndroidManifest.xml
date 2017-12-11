@@ -21,6 +21,8 @@
         <activity   android:name=".activities.ChessBoard.ChessBoardActivity"
                     android:parentActivityName=".activities.HomeScreen.HomeScreenActivity">
         </activity>
+        <activity android:name=".activities.GameReplay.GameReplayActivity"
+                  android:parentActivityName=".activities.SavedGames.SavedGamesActivity"/>
     </application>
 
 </manifest>

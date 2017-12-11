@@ -7,10 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.group55.androidchess55.models.ChessPiece;
 import com.example.group55.androidchess55.models.SavedGameInfo;
 
 import java.util.LinkedList;
@@ -62,7 +60,8 @@ public class SavedGamesAdapter extends android.widget.BaseAdapter {
 
         // Set text
         textView.setText(saved_games.get(position).toString());
-
+        //Set padding
+        textView.setPadding(15, 15, 15, 15);
         // Set background color of box
         if (position % 2 == 0) {
             textView.setBackgroundColor(Color.parseColor("#EFF0F1"));

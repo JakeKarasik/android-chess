@@ -606,7 +606,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 	public boolean saveRecording(String title) {
 		Date today = Calendar.getInstance().getTime();
-		String current_dt = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(today);
+		String current_dt = new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(today);
 		try{
 			// Save game to ser file
 			FileOutputStream fos = openFileOutput(title+"~"+current_dt+".ser", Context.MODE_PRIVATE);

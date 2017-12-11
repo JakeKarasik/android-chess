@@ -7,6 +7,9 @@
     <string name="undo">Undo</string>
     <string name="draw">Draw</string>
     <string name="forfeit">Forfeit</string>
-    <string name="submit">Submit</string>
     <string name="home_chess_image">home_chess_image</string>
+    <string name="sort_by_date">Sort By Date</string>
+    <string name="sort_by_title">Sort by Title</string>
+    <string name="prev_arrow"><![CDATA[<-]]></string>
+    <string name="next_arrow"><![CDATA[->]]></string>
 </resources>
