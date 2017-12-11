@@ -201,7 +201,6 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 			// If we have selected our own piece and it passes check
 			if (prev_piece.getColor() == turn_color && pass && prev_piece.move(dest)) {
-
 				// Check for promotion
 				if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
 					promotePiece(dest);
@@ -403,45 +402,72 @@ public class ChessBoardActivity extends AppCompatActivity {
 	}
 
 	// Randomly move a piece on AI move button press
-	public void moveAI(View v) {
 
-		int cur_turn = turn;
+	public void moveAI(View v){
 
-		// Get current turn color
 		char turn_color = (turn % 2 == 0) ? 'b' : 'w';
+		LinkedList<ChessPiece> pieces = new LinkedList<>();
 
-		// Choose random starting point
-		int start_pos = new Random().nextInt(64);
-
-		int i;
-		for (i = start_pos; i < 64; i++) {
-			// If not null, matching color and has available moves...
+		for(int i = 0; i < 64; i++){
 			ChessPiece curr_piece = horizon_board[i];
-			if (curr_piece != null && curr_piece.getColor() == turn_color) {
-				curr_piece.listUpdate();
-				// If has possible moves, move this piece!
-				if (curr_piece.possible_moves.size() > 0) {
+			if(curr_piece != null && curr_piece.getColor() == turn_color){
+				pieces.add(curr_piece);
+			}
+		}
+
+		int selected_move[] = new int[2];
+		int piece_index;
+		ChessPiece selected = null;
+
+		if(isInCheck){
+			boolean found = false;
+			while(!found){
+				piece_index = new Random().nextInt(pieces.size());
+				selected = pieces.get(piece_index);
+				selected.listUpdate();
+				if(selected.getName() == 'K'){
+					for(int [] item : escape_check) {
+						for(int [] dest : selected.possible_moves){
+							if(Arrays.equals(item, dest)){
+								selected_move = dest;
+								found = true;
+								break; }
+						}
+						if(found){ break; }
+					}
+				}else{
+					for(int [] item : deny_check) {
+						for(int [] dest : selected.possible_moves){
+							if(Arrays.equals(item, dest)){
+								selected_move = dest;
+								found = true;
+								break; }
+						}
+						if(found){ break; }
+					}
+				}
+				pieces.remove(selected);
+			}
+		}else{
+			while(pieces.size() > 0){
+				piece_index = new Random().nextInt(pieces.size());
+				selected = pieces.get(piece_index);
+				selected.listUpdate();
+				if(selected.possible_moves.size() > 0){
+					selected_move = selected.possible_moves.get(new Random().nextInt(selected.possible_moves.size()));
 					break;
 				}
+				pieces.remove(selected);
 			}
-			// No match was found, start from beginning
-			if (i == 63) { i = -1; }
 		}
 
 		// Set the previous move globals to allow undoing
-		prev_pos[0] = i / 8;
-		prev_pos[1] = i % 8;
-		prev_piece = board[i/8][i%8];
+		prev_pos[0] = selected.getPos()[0];
+		prev_pos[1] = selected.getPos()[1];
+		prev_piece = board[selected.getPos()[0]][selected.getPos()[1]];
 		moving = true;
-
-		// At this point should have at least 1 possible move
-		LinkedList<int[]> possible_moves = prev_piece.possible_moves;
-		int choice = new Random().nextInt(possible_moves.size());
-		int[] selected_move = possible_moves.get(choice);
 		makeMove((selected_move[0]*8)+selected_move[1]);
 
-		// If no move was made, retry moveAI
-		if (cur_turn == turn) { moveAI(null); }
 	}
 
 	/**
