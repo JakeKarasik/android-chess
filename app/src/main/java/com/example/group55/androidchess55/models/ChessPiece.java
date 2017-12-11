@@ -1,5 +1,7 @@
 package com.example.group55.androidchess55.models;
 
+import android.util.Log;
+
 import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
 
 import java.io.Serializable;
@@ -236,21 +238,18 @@ public abstract class ChessPiece implements Serializable {
 	            ChessPiece piece = ChessBoardActivity.board[i][j];
 	            if (piece != null && piece.getColor() != color && // Not null or same color
                    (i != target[0] || j != target[1])) { // Not same piece
-
-                    // Prevent looping, update move lists
-                    if (piece.getName() != 'K' && piece.getName() != 'P') {
-                        piece.listUpdate();
-                    } else if(piece.getName() == 'K') {
-                        King temp_king = (King)piece;
-                        temp_king.listUpdateNoSpec();
-                    } else if(piece.getName() == 'P') {
-                    	Pawn temp_pawn = (Pawn)piece;
-                    	temp_pawn.listUpdateNoSpec();
-					}
-
+					piece.listUpdate();
 	                if (piece.possible_moves.size() != 0) {
 	                    for (int[] item : piece.possible_moves) {
+	                    	/*
+	                    	if(piece.getName() == 'Q' && piece.getColor() == 'w' && piece.getPos()[0] == 0){
+	                    		Log.d("stuff", Integer.toString(item[0]) + "," + Integer.toString(item[1]));
+							}*/
 	                        if (Arrays.equals(item,target)) {
+								if(piece.getName() == 'Q' && piece.getColor() == 'w' && piece.getPos()[0] == 0){
+									Log.d("stuff", "HI" + Integer.toString(item[0]) + Integer.toString(item[1])
+									+ Integer.toString(target[0]) + Integer.toString(target[1]));
+								}
 	                            ChessBoardActivity.zone_check_mode = false;
 	                            return false;
                             }

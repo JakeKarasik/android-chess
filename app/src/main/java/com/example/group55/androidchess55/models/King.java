@@ -45,35 +45,6 @@ public class King extends ChessPiece {
 	/**
 	 * A modified version of <code>listUpdate()</code> that doesn't include castling and is used only for safe zone checking.
 	 */
-	public void listUpdateNoSpec() {
-		int origin[] = getPos(); //[ROW, COL]
-		possible_moves = new LinkedList<>();
-
-		//Standard moves
-		int[] up 			= {origin[0] - 1, origin[1]};
-		int[] up_right 		= {origin[0] - 1, origin[1] + 1};
-		int[] right 		= {origin[0], origin[1] + 1};
-		int[] down_right 	= {origin[0] + 1, origin[1] + 1};
-		int[] down 			= {origin[0] + 1, origin[1]};
-		int[] down_left 	= {origin[0] + 1, origin[1] - 1};
-		int[] left 			= {origin[0], origin[1] - 1};
-		int[] up_left 		= {origin[0] - 1, origin[1] - 1};
-
-		int[][] standard_moves = {up, up_right, right, down_right, down, down_left, left, up_left};
-
-		for (int[] move : standard_moves) {
-
-			if (ChessBoardActivity.inBounds(move)) {
-				ChessPiece dest_piece = ChessBoardActivity.board[move[0]][move[1]];
-				//If moves are within bounds
-                if (ChessBoardActivity.zone_check_mode) {
-                    possible_moves.add(move.clone());
-                }else if ((dest_piece == null || isEnemyOf(dest_piece))) {
-					possible_moves.add(move.clone());
-				}
-			}
-		}
-	}
 	
 	/* (non-Javadoc)
 	 * @see chess.ChessPiece#listUpdate()
@@ -108,6 +79,8 @@ public class King extends ChessPiece {
 				}
 			}
 		}
+
+		if(ChessBoardActivity.zone_check_mode){ return; }
 		
 		//If can castle, add possible moves to list
 		if(hasMoved() == 0  && !isInCheck()){

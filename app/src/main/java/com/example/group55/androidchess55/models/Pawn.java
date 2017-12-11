@@ -71,6 +71,16 @@ public class Pawn extends ChessPiece {
         possible_moves =  new LinkedList<>();
         int move[] = new int[2];
 
+        // Can move diagonally
+        move[0] = origin[0] + delta;
+        move[1] = origin[1] + delta;
+        pawnDiag(move, delta);
+        move[0] = origin[0] + delta;
+        move[1] = origin[1] - delta;
+        pawnDiag(move, delta);
+
+        if(ChessBoardActivity.zone_check_mode){ return; }
+
         // Can move forward one space
         move[0] = origin[0] + delta;
         move[1] = origin[1];
@@ -83,36 +93,11 @@ public class Pawn extends ChessPiece {
             move[1] = origin[1];
             // And within bounds and not blocked
             if(		ChessBoardActivity.inBounds(move) &&
-					ChessBoardActivity.board[move[0]][move[1]] == null &&
-					hasMoved() == 0){
+                    ChessBoardActivity.board[move[0]][move[1]] == null &&
+                    hasMoved() == 0){
                 possible_moves.add(move.clone());
             }
         }
-        // Can move diagonally
-        move[0] = origin[0] + delta;
-        move[1] = origin[1] + delta;
-        pawnDiag(move, delta);
-        move[0] = origin[0] + delta;
-        move[1] = origin[1] - delta;
-        pawnDiag(move, delta);
-    }
-
-    public void listUpdateNoSpec(){
-        int origin[] = getPos();
-        int delta;
-        if(getColor() == 'w'){  delta = -1; }else{  delta = 1;  }
-
-        // Clear and start from empty
-        possible_moves =  new LinkedList<>();
-        int move[] = new int[2];
-
-        // Can move diagonally
-        move[0] = origin[0] + delta;
-        move[1] = origin[1] + delta;
-        pawnDiag(move, delta);
-        move[0] = origin[0] + delta;
-        move[1] = origin[1] - delta;
-        pawnDiag(move, delta);
     }
 
     /* (non-Javadoc)

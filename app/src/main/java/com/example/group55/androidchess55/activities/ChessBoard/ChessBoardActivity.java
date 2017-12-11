@@ -287,14 +287,35 @@ public class ChessBoardActivity extends AppCompatActivity {
 			canUndo = false;
 			moving = false;
 
-			// Verify check states
+			// Update king positions
+			for(int i = 0; i < 64; i ++){
+				if(horizon_board[i] != null && horizon_board[i].getName() == 'K'){
+					if(horizon_board[i].getColor() == 'w'){
+						white_king = horizon_board[i].getPos();
+					}else{
+						black_king = horizon_board[i].getPos();
+					}
+				}
+			}
+
 			if (!ChessPiece.isSafe(white_king, 'w')) {
+				// If black placed white in check, test and show status
 				isInCheck = true;
-				showNotification("White's king is in check");
+				if (board[white_king[0]][white_king[1]].mateChecker()) {
+					endGameNotification("Checkmate, Black wins!");
+				} else {
+					showNotification("White's king is in check.");
+				}
 			} else if (!ChessPiece.isSafe(black_king, 'b')) {
+				// If white placed black in check, test and show status
 				isInCheck = true;
-				showNotification("Black's king is in check");
+				if (board[black_king[0]][black_king[1]].mateChecker()) {
+					endGameNotification("Checkmate, White wins!");
+				} else {
+					showNotification("Black's king is in check.");
+				}
 			} else {
+				// No check detected, disable alarm
 				isInCheck = false;
 			}
 		}
@@ -382,9 +403,11 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 	// Randomly move a piece on AI move button press
 	public void moveAI(View v) {
+
 		int cur_turn = turn;
+
 		// Get current turn color
-		char curr_color = (turn % 2 == 0) ? 'b' : 'w';
+		char turn_color = (turn % 2 == 0) ? 'b' : 'w';
 
 		// Choose random starting point
 		int start_pos = new Random().nextInt(64);
@@ -393,17 +416,15 @@ public class ChessBoardActivity extends AppCompatActivity {
 		for (i = start_pos; i < 64; i++) {
 			// If not null, matching color and has available moves...
 			ChessPiece curr_piece = horizon_board[i];
-			if (curr_piece != null && curr_piece.getColor() == curr_color) {
+			if (curr_piece != null && curr_piece.getColor() == turn_color) {
 				curr_piece.listUpdate();
 				// If has possible moves, move this piece!
 				if (curr_piece.possible_moves.size() > 0) {
 					break;
 				}
 			}
-			// No match was found... start from the top
-			if (i == 63) {
-				i = -1;
-			}
+			// No match was found, start from beginning
+			if (i == 63) { i = -1; }
 		}
 
 		// Set the previous move globals to allow undoing
@@ -417,9 +438,9 @@ public class ChessBoardActivity extends AppCompatActivity {
 		int choice = new Random().nextInt(possible_moves.size());
 		int[] selected_move = possible_moves.get(choice);
 		makeMove((selected_move[0]*8)+selected_move[1]);
-		if (cur_turn == turn) {
-			moveAI(null);
-		}
+
+		// If no move was made, retry moveAI
+		if (cur_turn == turn) { moveAI(null); }
 	}
 
 	/**
