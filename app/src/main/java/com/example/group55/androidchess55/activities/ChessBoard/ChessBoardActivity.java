@@ -31,117 +31,47 @@ import java.util.Random;
 
 public class ChessBoardActivity extends AppCompatActivity {
 
-	// Public globals; accessible by other classes
-
-	/**
-	 * Main chessboard.
-	 */
-	public static ChessPiece[][] board;
-
-	/**
-	 * Keeps track of turns. Initialized to 1.
-	 */
-	public static int turn = 1;
-
-	/**
-	 * <code>true</code> when testing for safe zones for check.
-	 */
-	public static boolean zone_check_mode = false;
-
-	/**
-	 * Contains valid coordinates for escaping check by moving king.
-	 */
-	public static LinkedList<int[]> escape_check;
-
-	/**
-	 * Contains valid coordinates for escaping check by moving non-king.
-	 */
-	public static LinkedList<int[]> deny_check;
-
-
-	// Local globals; inaccessible by other classes.
-
-	/**
-	 * Adapter for GridView.
-	 */
+	// Android widgets
 	static BaseAdapter adapter;
-
-	/**
-	 * GridView that displays our chessboard.
-	 */
 	GridView board_grid;
 
-	/**
-	 * Stores previous chessboard for undo.
-	 */
-	static ChessPiece[][] prev_board;
-
-	/**
-	 * Conversion of 2D chessboard to 1D. Used to display in GridView.
-	 */
+	// Boards
+	public static ChessPiece[][] board;
 	static ChessPiece[] horizon_board;
-
-	/**
-	 * Checks if player has selected a piece to move.
-	 */
-	static boolean moving = false;
-
-	/**
-	 * Stores previous position (origin) of selected piece.
-	 */
-	static int prev_pos[] = new int[2];
-
-	/**
-	 * ChessPiece selected by player.
-	 */
-	static ChessPiece prev_piece = null;
-
-	/**
-	 * Stores current player's color.
-	 */
-	static char turn_color = '\0';
-
-	/**
-	 * Prevents player from undoing more than once.
-	 */
-	static boolean canUndo = false;
-
-	/**
-	 * Stores black king's current position.
-	 */
-	static int[] black_king = new int[]{0, 4};
-
-	/**
-	 * Stores white king's current position.
-	 */
-	static int[] white_king = new int[]{7, 4};
-
-	/**
-	 * Checks if either black or white king is in check.
-	 */
-	static boolean isInCheck = false;
-
-	/**
-	 * List of all boards in current game
-	 */
 	static LinkedList<ChessPiece[]> recording;
 
-	/**
-	 * Resets board to default state when called.
-	 */
+	// Valid coordinates for escaping check
+	public static LinkedList<int[]> escape_check;
+	public static LinkedList<int[]> deny_check;
+
+	// Flags
+	public static int turn = 1;
+	public static boolean zone_check_mode = false;
+	static boolean moving = false;
+	static int prev_pos[] = new int[2];
+	static ChessPiece prev_piece = null;
+	static char turn_color = '\0';
+	static boolean canUndo = false;
+	static int[] black_king = new int[]{0, 4};
+	static int[] white_king = new int[]{7, 4};
+	static boolean isInCheck = false;
+
+	// Resets board to default state when called
 	public void reset() {
 
-		// Create board and initialize
+		// Create new board and initialize
 		board = new ChessPiece[8][8];
 		horizon_board = new ChessPiece[64];
+		recording = new LinkedList<>();
 		initBoard();
+
+		// Reset escape coordinates
+		escape_check = null;
+		deny_check = null;
 
 		// Set flags
 		turn = 1;
 		zone_check_mode = false;
-		escape_check = null;
-		deny_check = null;
-		prev_board = null;
 		moving = false;
 		prev_pos = new int[2];
 		prev_piece = null;
@@ -150,14 +80,39 @@ public class ChessBoardActivity extends AppCompatActivity {
 		black_king = new int[]{0, 4};
 		white_king = new int[]{7, 4};
 		isInCheck = false;
-		recording = new LinkedList<>();
 	}
 
-	/**
-	 * Display our chessboard and set actions on click.
-	 *
-	 * @param savedInstanceState State of application
-	 */
+	// Syncs horizon with current state of board
+	public static void convertToHorizon() {
+		for (int i = 0; i < 64; i++) {
+			horizon_board[i] = board[i / 8][i % 8];
+		}
+		adapter.notifyDataSetChanged();
+	}
+
+	// Returns a copy of board as a 1-D array
+	public ChessPiece[] copyBoard() {
+		ChessPiece[] temp_board = new ChessPiece[64];
+		for (int i = 0; i < 64; i++) {
+			if (board[i/8][i%8] != null) {
+				temp_board[i] = cloner(board[i/8][i%8]);
+			}
+		}
+		return temp_board;
+	}
+
+	// Takes a 1-D array, loads it into board and then syncs with horizon
+	public void loadBoard(ChessPiece[] horizon){
+
+		board = new ChessPiece[8][8];
+		for(int i = 0; i < 64; i++){
+			if(horizon[i] != null) {
+				board[i / 8][i % 8] = cloner(horizon[i]);
+			}
+		}
+		convertToHorizon();
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -179,9 +134,11 @@ public class ChessBoardActivity extends AppCompatActivity {
 		// Display board
 		adapter = new ChessBoardAdapter(ChessBoardActivity.this, horizon_board);
 		convertToHorizon();
-		recording.add(copyBoard());
 		board_grid = findViewById(R.id.board_grid);
 		board_grid.setAdapter(adapter);
+
+		// Record initial state of board
+		recording.add(copyBoard());
 
 		// Set action on user input
 		board_grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -193,7 +150,6 @@ public class ChessBoardActivity extends AppCompatActivity {
 	}
 
 	public void makeMove(int position) {
-
 
 		// Sets turn color based on turn number
 		turn_color = (turn % 2 == 0) ? 'b' : 'w';
@@ -222,49 +178,34 @@ public class ChessBoardActivity extends AppCompatActivity {
 				return;
 			}
 
-			// Set up destination coordinates in 2D
+			// Move requested, set up destination coordinates in 2-D
 			int dest[] = new int[2];
 			dest[0] = position / 8;
 			dest[1] = position % 8;
 
-			// Check that if player is in check (not mate), move will let him escape
+			// Check that if player is in check, move will let him escape
 			boolean pass = true;
 			if (isInCheck) {
 				pass = false;
-				if(prev_piece.getName() == 'K' && escape_check != null){
+				if(prev_piece.getName() == 'K'){
 					for (int[] item : escape_check) {
 						if (Arrays.equals(item, dest)) { pass = true; }
 					}
-				}else if(deny_check != null){
+				}else{
 					for (int[] item : deny_check) {
 						if (Arrays.equals(item, dest)) { pass = true; }
 					}
 				}
 			}
 
-			// If we have selected our own piece and it passes
-			if (prev_piece != null && prev_piece.getColor() == turn_color && pass) {
-
-				// Check that move is valid
-				if (!prev_piece.isValidMove(dest)) {
-					return;
-				}
-
-				// Copy board and move
-				prev_piece.move(dest);
+			// If we have selected our own piece and it passes check
+			if (prev_piece.getColor() == turn_color && pass && prev_piece.move(dest)) {
 
 				// Check for promotion
 				if (prev_piece.getName() == 'P' && (dest[0] == 7 || dest[0] == 0)) {
 					promotePiece(dest);
 					return;
 				}
-
-				// Update board state
-				convertToHorizon();
-				recording.add(copyBoard());
-				board_grid.setAdapter(adapter);
-				turn++;
-				moving = false;
 
 				// If a king is moved, update it's global position
 				if (prev_piece.getName() == 'K') {
@@ -274,6 +215,13 @@ public class ChessBoardActivity extends AppCompatActivity {
 						black_king = dest.clone();
 					}
 				}
+
+				// Update and record new board state
+				convertToHorizon();
+				board_grid.setAdapter(adapter);
+				recording.add(copyBoard());
+				turn++;
+				moving = false;
 
 				// Check if a king has been placed in check
 				if (!ChessPiece.isSafe(white_king, 'w')) {
@@ -285,31 +233,69 @@ public class ChessBoardActivity extends AppCompatActivity {
 						canUndo = true;
 						return;
 					}
+
+					// If black placed white in check, test and show status
 					isInCheck = true;
 					if (board[white_king[0]][white_king[1]].mateChecker()) {
-						endGameNotification("Checkmate, Black Wins!");
+						endGameNotification("Checkmate, Black wins!");
 					} else {
-						showNotification("White King in Check");
+						showNotification("White's king is in check.");
 					}
 				} else if (!ChessPiece.isSafe(black_king, 'b')) {
 
+					// If black player placed himself in check, undo
 					if (turn_color == 'b') {
 						canUndo = true;
 						undo(null);
+						canUndo = true;
 						return;
 					}
 
+					// If white placed black in check, test and show status
 					isInCheck = true;
 					if (board[black_king[0]][black_king[1]].mateChecker()) {
-						endGameNotification("Checkmate, White Wins!");
+						endGameNotification("Checkmate, White wins!");
 					} else {
-						showNotification("Black King in Check");
+						showNotification("Black's king is in check.");
 					}
 				} else {
+					// No check detected, disable alarm
 					isInCheck = false;
 				}
 
+				// Allow player to undo one turn
 				canUndo = true;
+			}
+		}
+	}
+
+	// Undo last move made
+	public void undo(View v) {
+		if (canUndo) {
+			// Remove last board from record
+			recording.removeLast();
+
+			// Load the most recent record of chessboard after undoing
+			ChessPiece[] temp = recording.getLast();
+			loadBoard(temp);
+			board_grid.setAdapter(adapter);
+
+			// Update global states
+			turn--;
+			convertToHorizon();
+			board_grid.setAdapter(adapter);
+			canUndo = false;
+			moving = false;
+
+			// Verify check states
+			if (!ChessPiece.isSafe(white_king, 'w')) {
+				isInCheck = true;
+				showNotification("White's king is in check");
+			} else if (!ChessPiece.isSafe(black_king, 'b')) {
+				isInCheck = true;
+				showNotification("Black's king is in check");
+			} else {
+				isInCheck = false;
 			}
 		}
 	}
@@ -340,21 +326,12 @@ public class ChessBoardActivity extends AppCompatActivity {
 						break;
 				}
 
-				// Update board state
+				// Update and record new board state
 				convertToHorizon();
-				recording.add(copyBoard());
 				board_grid.setAdapter(adapter);
+				recording.add(copyBoard());
 				turn++;
 				moving = false;
-
-				// If a king is moved, update it's global position
-				if (prev_piece.getName() == 'K') {
-					if (prev_piece.getColor() == 'w') {
-						white_king = dest.clone();
-					} else {
-						black_king = dest.clone();
-					}
-				}
 
 				// Check if a king has been placed in check
 				if (!ChessPiece.isSafe(white_king, 'w')) {
@@ -366,14 +343,17 @@ public class ChessBoardActivity extends AppCompatActivity {
 						canUndo = true;
 						return;
 					}
+
+					// If black placed white in check, test and show status
 					isInCheck = true;
 					if (board[white_king[0]][white_king[1]].mateChecker()) {
-						endGameNotification("Checkmate, Black Wins!");
+						endGameNotification("Checkmate, Black wins!");
 					} else {
-						showNotification("White King in Check");
+						showNotification("White's king is in check.");
 					}
 				} else if (!ChessPiece.isSafe(black_king, 'b')) {
 
+					// If black player placed himself in check, undo
 					if (turn_color == 'b') {
 						canUndo = true;
 						undo(null);
@@ -381,20 +361,65 @@ public class ChessBoardActivity extends AppCompatActivity {
 						return;
 					}
 
+					// If white placed black in check, test and show status
 					isInCheck = true;
 					if (board[black_king[0]][black_king[1]].mateChecker()) {
-						endGameNotification("Checkmate, White Wins!");
+						endGameNotification("Checkmate, White wins!");
 					} else {
-						showNotification("Black King in Check");
+						showNotification("Black's king is in check.");
 					}
 				} else {
+					// No check detected, disable alarm
 					isInCheck = false;
 				}
 
+				// Allow player to undo one turn
 				canUndo = true;
 			}
 		});
 		d.create().show();
+	}
+
+	// Randomly move a piece on AI move button press
+	public void moveAI(View v) {
+		int cur_turn = turn;
+		// Get current turn color
+		char curr_color = (turn % 2 == 0) ? 'b' : 'w';
+
+		// Choose random starting point
+		int start_pos = new Random().nextInt(64);
+
+		int i;
+		for (i = start_pos; i < 64; i++) {
+			// If not null, matching color and has available moves...
+			ChessPiece curr_piece = horizon_board[i];
+			if (curr_piece != null && curr_piece.getColor() == curr_color) {
+				curr_piece.listUpdate();
+				// If has possible moves, move this piece!
+				if (curr_piece.possible_moves.size() > 0) {
+					break;
+				}
+			}
+			// No match was found... start from the top
+			if (i == 63) {
+				i = -1;
+			}
+		}
+
+		// Set the previous move globals to allow undoing
+		prev_pos[0] = i / 8;
+		prev_pos[1] = i % 8;
+		prev_piece = board[i/8][i%8];
+		moving = true;
+
+		// At this point should have at least 1 possible move
+		LinkedList<int[]> possible_moves = prev_piece.possible_moves;
+		int choice = new Random().nextInt(possible_moves.size());
+		int[] selected_move = possible_moves.get(choice);
+		makeMove((selected_move[0]*8)+selected_move[1]);
+		if (cur_turn == turn) {
+			moveAI(null);
+		}
 	}
 
 	/**
@@ -558,52 +583,6 @@ public class ChessBoardActivity extends AppCompatActivity {
 		endGameNotification(caller_color + " has forfeited.");
 	}
 
-	/**
-	 * Randomly move a piece on AI move button press
-	 *
-	 * @param v View calling moveAI
-	 */
-	public void moveAI(View v) {
-		int cur_turn = turn;
-		// Get current turn color
-		char curr_color = (turn % 2 == 0) ? 'b' : 'w';
-
-		// Choose random starting point
-		int start_pos = new Random().nextInt(64);
-
-		int i;
-		for (i = start_pos; i < 64; i++) {
-			// If not null, matching color and has available moves...
-			ChessPiece curr_piece = horizon_board[i];
-			if (curr_piece != null && curr_piece.getColor() == curr_color) {
-				curr_piece.listUpdate();
-				// If has possible moves, move this piece!
-				if (curr_piece.possible_moves.size() > 0) {
-					break;
-				}
-			}
-			// No match was found... start from the top
-			if (i == 63) {
-				i = -1;
-			}
-		}
-
-		// Set the previous move globals to allow undoing
-		prev_pos[0] = i / 8;
-		prev_pos[1] = i % 8;
-		prev_piece = board[i/8][i%8];
-		moving = true;
-
-		// At this point should have at least 1 possible move
-		LinkedList<int[]> possible_moves = prev_piece.possible_moves;
-		int choice = new Random().nextInt(possible_moves.size());
-		int[] selected_move = possible_moves.get(choice);
-		makeMove((selected_move[0]*8)+selected_move[1]);
-		if (cur_turn == turn) {
-			moveAI(null);
-		}
-	}
-
 	public boolean saveRecording(String title) {
 		Date today = Calendar.getInstance().getTime();
 		String current_dt = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(today);
@@ -621,22 +600,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 		}
 	}
 
-	/**
-	 * Adapt 2D chessboard to 1D
-	 */
-	public static void convertToHorizon() {
-		for (int i = 0; i < 64; i++) {
-			horizon_board[i] = board[i / 8][i % 8];
-		}
-		adapter.notifyDataSetChanged();
-	}
-
-	/**
-	 * Converts a given string coordinate to its position on the board.
-	 *
-	 * @param pos Coordinate in string form. Ex: a1
-	 * @return <code>[row, col]</code> of given pos.
-	 */
+	// Converts a given string coordinate to its position on the board.
 	public static int[] strPositionToXY(String pos) {
 		//Create array for final pos
 		int[] final_pos = new int[2];
@@ -648,20 +612,13 @@ public class ChessBoardActivity extends AppCompatActivity {
 		return final_pos;
 	}
 
-	/**
-	 * Places given piece on board at given position and sets the pieces pos field.
-	 *
-	 * @param pos   Position to place piece.
-	 * @param piece ChessPiece to be placed.
-	 */
+	// Places given piece on board at given position and sets the piece's position
 	public static void placePiece(int[] pos, ChessPiece piece) {
 		board[pos[0]][pos[1]] = piece;
 		piece.setPos(pos);
 	}
 
-	/**
-	 * Initializes board with all the pieces for both Black and White in their correct starting positions.
-	 */
+	// Initializes board with all the pieces for both Black and White in initial positions.
 	public static void initBoard() {
 
 		// Place black pieces
@@ -702,12 +659,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 	}
 
-	/**
-	 * Given a piece returns a clone of it.
-	 *
-	 * @param item Piece to clone.
-	 * @return Cloned piece.
-	 */
+	// Returns a deep copy of a ChessPiece
 	public static ChessPiece cloner(ChessPiece item) {
 		switch (item.getName()) {
 			case 'P':
@@ -727,80 +679,8 @@ public class ChessBoardActivity extends AppCompatActivity {
 		}
 	}
 
-	/**
-	 * Checks that the coordinates given are inside the bounds
-	 *
-	 * @param input Coordinates to check.
-	 * @return <code>true</code> if input is within the bounds of the board.
-	 */
+	// Checks that the coordinates given are inside the bounds
 	public static boolean inBounds(int[] input) {
 		return input[0] >= 0 && input[1] >= 0 && input[0] <= 7 && input[1] <= 7;
-	}
-
-	public ChessPiece[] copyBoard() {
-
-		ChessPiece[] temp_board = new ChessPiece[64];
-		for (int i = 0; i < 64; i++) {
-			if (board[i/8][i%8] != null) {
-				temp_board[i] = cloner(board[i/8][i%8]);
-			}
-		}
-		return temp_board;
-	}
-
-	public void loadBoard(ChessPiece[] horizon){
-
-		board = new ChessPiece[8][8];
-		for(int i = 0; i < 64; i++){
-			if(horizon[i] != null) {
-				board[i / 8][i % 8] = cloner(horizon[i]);
-			}
-		}
-		convertToHorizon();
-	}
-
-	/**
-	 * Undo last move made.
-	 *
-	 * @param v View calling undo
-	 */
-	public void undo(View v) {
-		if (canUndo) {
-			Log.d("stuff", Integer.toString(recording.size()));
-			// Remove last board since it was undone
-			recording.removeLast();
-			Log.d("stuff", Integer.toString(recording.size()));
-
-			ChessPiece[] temp = recording.getLast();
-			loadBoard(temp);
-			board_grid.setAdapter(adapter);
-
-
-			// Update global states
-			turn--;
-			convertToHorizon();
-			board_grid.setAdapter(adapter);
-			canUndo = false;
-
-			// Verify check states
-			if (!ChessPiece.isSafe(white_king, 'w')) {
-				isInCheck = true;
-				if (board[white_king[0]][white_king[1]].mateChecker()) {
-					endGameNotification("Checkmate, Black Wins!");
-				} else {
-					showNotification("White King in Check");
-				}
-			} else if (!ChessPiece.isSafe(black_king, 'b')) {
-				isInCheck = true;
-				isInCheck = true;
-				if (board[black_king[0]][black_king[1]].mateChecker()) {
-					endGameNotification("Checkmate, White Wins!");
-				} else {
-					showNotification("Black King in Check");
-				}
-			} else {
-				isInCheck = false;
-			}
-		}
 	}
 }
