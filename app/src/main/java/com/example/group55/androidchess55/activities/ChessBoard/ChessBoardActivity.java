@@ -728,14 +728,14 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 		ChessPiece[] temp_board = new ChessPiece[64];
 		for (int i = 0; i < 64; i++) {
-			if (board[i] != null) {
+			if (board[i/8][i%8] != null) {
 				temp_board[i] = cloner(board[i/8][i%8]);
 			}
 		}
 		return temp_board;
 	}
 
-	public void loadHorizonToBoard(){
+	public void loadHorizonToBoard(ChessPiece[] horizon){
 
 	}
 
@@ -747,19 +747,12 @@ public class ChessBoardActivity extends AppCompatActivity {
 	public void undo(View v) {
 		if (canUndo) {
 
-			// Copy over previous board to current board
-			for (int i = 0; i < 8; i++) {
-				for (int j = 0; j < 8; j++) {
-					if (prev_board[i][j] != null) {
-						board[i][j] = cloner(prev_board[i][j]);
-					} else {
-						board[i][j] = null;
-					}
-				}
-			}
-
 			// Remove last board since it was undone
 			recording.removeLast();
+
+			ChessPiece[] temp = recording.getLast();
+			loadHorizonToBoard(temp);
+
 
 			// Update global states
 			turn--;
