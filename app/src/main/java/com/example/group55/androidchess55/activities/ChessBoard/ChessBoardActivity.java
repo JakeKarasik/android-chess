@@ -122,9 +122,9 @@ public class ChessBoardActivity extends AppCompatActivity {
 	static boolean isInCheck = false;
 
 	/**
-	 * List of all boards in game
+	 * List of all boards in current game
 	 */
-	static LinkedList<ChessPiece[]> recording = new LinkedList<ChessPiece[]>();
+	static LinkedList<ChessPiece[]> recording = new LinkedList<>();
 
 	/**
 	 * Resets board to default state when called.
@@ -249,7 +249,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 				}
 
 				// Copy board and move
-				getBoardState();
+				prev_board = copyBoard();
 				prev_piece.move(dest);
 
 				// Check for promotion
@@ -260,7 +260,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 				// Update board state
 				convertToHorizon();
-				recording.add(horizon_board.clone());
+				recording.add(copyHorizon());
 				board_grid.setAdapter(adapter);
 				turn++;
 				moving = false;
@@ -724,16 +724,27 @@ public class ChessBoardActivity extends AppCompatActivity {
 		return input[0] >= 0 && input[1] >= 0 && input[0] <= 7 && input[1] <= 7;
 	}
 
-	public void getBoardState() {
-		prev_board = new ChessPiece[8][8];
+	public ChessPiece[][] copyBoard() {
+
+		ChessPiece[][] temp_board = new ChessPiece[8][8];
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if (board[i][j] != null) {
-					prev_board[i][j] = cloner(board[i][j]);
+					temp_board[i][j] = cloner(board[i][j]);
 				}
 			}
 		}
+		return temp_board;
+	}
 
+	public ChessPiece[] copyHorizon(){
+		ChessPiece[] temp_board = new ChessPiece[64];
+		for (int i = 0; i < 64; i++) {
+				if (board[i] != null) {
+					temp_board[i] = cloner(board[i/8][i%8]);
+				}
+		}
+		return temp_board;
 	}
 
 	/**
