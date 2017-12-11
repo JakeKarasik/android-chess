@@ -130,6 +130,7 @@ public abstract class ChessPiece {
 
 	    // Keep track of possible escape moves
         ChessBoardActivity.escape_check = new LinkedList<>();
+        ChessBoardActivity.deny_check = new LinkedList<>();
 
         // Update and check if there are any possible moves
 	    listUpdate();
@@ -188,7 +189,7 @@ public abstract class ChessPiece {
 
                             // Check if this breaks check
                             if (isSafe(pos, color)) {
-                                ChessBoardActivity.escape_check.add(item.clone());
+                                ChessBoardActivity.deny_check.add(item.clone());
                             }
                             // Revert move
                             ChessBoardActivity.board[cloned_origin.getPos()[0]][cloned_origin.getPos()[1]] = friend;
@@ -212,7 +213,7 @@ public abstract class ChessPiece {
 
             }
         }
-        return ( ChessBoardActivity.escape_check.size() == 0);
+        return ( ChessBoardActivity.escape_check.size() == 0 || ChessBoardActivity.deny_check.size() == 0);
     }
     /**
      * Checks if a given space is safe from the enemy color.
