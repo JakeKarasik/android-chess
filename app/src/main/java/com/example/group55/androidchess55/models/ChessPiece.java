@@ -213,7 +213,7 @@ public abstract class ChessPiece {
 
             }
         }
-        return ( ChessBoardActivity.escape_check.size() == 0 || ChessBoardActivity.deny_check.size() == 0);
+        return ( ChessBoardActivity.escape_check.size() == 0 && ChessBoardActivity.deny_check.size() == 0);
     }
     /**
      * Checks if a given space is safe from the enemy color.

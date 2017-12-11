@@ -194,6 +194,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 	public void makeMove(int position) {
 
+
 		// Sets turn color based on turn number
 		turn_color = (turn % 2 == 0) ? 'b' : 'w';
 
@@ -341,6 +342,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 				// Update board state
 				convertToHorizon();
+				recording.add(copyBoard());
 				board_grid.setAdapter(adapter);
 				turn++;
 				moving = false;
@@ -357,22 +359,25 @@ public class ChessBoardActivity extends AppCompatActivity {
 				// Check if a king has been placed in check
 				if (!ChessPiece.isSafe(white_king, 'w')) {
 
+					// If white player placed himself in check, undo
 					if (turn_color == 'w') {
 						canUndo = true;
 						undo(null);
+						canUndo = true;
 						return;
 					}
 					isInCheck = true;
 					if (board[white_king[0]][white_king[1]].mateChecker()) {
 						endGameNotification("Checkmate, Black Wins!");
 					} else {
-						showNotification("Check");
+						showNotification("White King in Check");
 					}
 				} else if (!ChessPiece.isSafe(black_king, 'b')) {
 
 					if (turn_color == 'b') {
 						canUndo = true;
 						undo(null);
+						canUndo = true;
 						return;
 					}
 
@@ -380,7 +385,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 					if (board[black_king[0]][black_king[1]].mateChecker()) {
 						endGameNotification("Checkmate, White Wins!");
 					} else {
-						showNotification("Check");
+						showNotification("Black King in Check");
 					}
 				} else {
 					isInCheck = false;
@@ -555,8 +560,10 @@ public class ChessBoardActivity extends AppCompatActivity {
 	 * @param v View calling moveAI
 	 */
 	public void moveAI(View v) {
+		int cur_turn = turn;
 		// Get current turn color
 		char curr_color = (turn % 2 == 0) ? 'b' : 'w';
+
 		// Choose random starting point
 		int start_pos = new Random().nextInt(64);
 
@@ -588,6 +595,9 @@ public class ChessBoardActivity extends AppCompatActivity {
 		int choice = new Random().nextInt(possible_moves.size());
 		int[] selected_move = possible_moves.get(choice);
 		makeMove((selected_move[0]*8)+selected_move[1]);
+		if (cur_turn == turn) {
+			moveAI(null);
+		}
 	}
 
 	public boolean saveRecording(String title) {
