@@ -27,17 +27,21 @@ public class SavedGamesAdapter extends android.widget.BaseAdapter {
 
     @Override
     public int getCount() {
-        return 0;
+        return saved_games.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return null;
+        return saved_games.get(i);
     }
 
     @Override
     public long getItemId(int i) {
         return 0;
+    }
+
+    public void add(SavedGameInfo item) {
+        saved_games.add(item);
     }
 
     @Override
@@ -51,7 +55,7 @@ public class SavedGamesAdapter extends android.widget.BaseAdapter {
             DisplayMetrics metrics = new DisplayMetrics();
             if(wm != null){ wm.getDefaultDisplay().getMetrics(metrics); }else{ return null; }
             int screen_width = metrics.widthPixels;
-            textView.setLayoutParams(new GridView.LayoutParams(screen_width, 50));
+            textView.setLayoutParams(new GridView.LayoutParams(screen_width, 100));
         } else {
             textView = (TextView) convertView;
         }

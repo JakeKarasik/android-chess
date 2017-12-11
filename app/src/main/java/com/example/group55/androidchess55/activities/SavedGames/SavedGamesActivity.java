@@ -1,5 +1,6 @@
 package com.example.group55.androidchess55.activities.SavedGames;
 
+import android.content.ContextWrapper;
 import android.icu.util.Calendar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -36,11 +37,12 @@ public class SavedGamesActivity extends AppCompatActivity {
         }
 
         saved_games = new LinkedList<>();
-        loadSavedGames();
         // Display board
         adapter = new SavedGamesAdapter(SavedGamesActivity.this, saved_games);
         ListView list_view = findViewById(R.id.list_view);
         list_view.setAdapter(adapter);
+        loadSavedGames();
+
     }
 
     public void loadSavedGames() {
@@ -49,26 +51,21 @@ public class SavedGamesActivity extends AppCompatActivity {
 //        SimpleClass simpleClass = (SimpleClass) is.readObject();
 //        is.close();
 //        fis.close();
-        String save_files[] = null;
-        try {
-            save_files = new File(".").list(new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".ser");
-                }
-            });
-        } catch(Exception e) {
-            Log.d("FAILED TO GET FILE NAMES", "AHHH", e);
-        }
+        String[] save_files = new ContextWrapper(this).getFilesDir().list(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".ser");
+            }
+        });
 
         if (save_files == null) {
             Log.d("ERROR", "SAVE_FILES IS NULL!");
             return;
         }
+
         for (String s : save_files) {
             Log.d("SAVE_FILES", s);
-            SavedGameInfo game = new SavedGameInfo(s, Calendar.getInstance(), null);
-            saved_games.add(game);
+            SavedGameInfo game = new SavedGameInfo(s.split("~")[0], Calendar.getInstance(), null);
+            adapter.add(game);
         }
-        //adapter.notifyDataSetChanged();
     }
 }
