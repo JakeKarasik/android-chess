@@ -1,7 +1,8 @@
 package com.example.group55.androidchess55.activities.ChessBoard;
 
 import android.content.Context;
-import android.icu.text.DateFormat;
+import android.icu.text.SimpleDateFormat;
+import android.icu.util.Calendar;
 import android.util.Log;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -604,9 +605,10 @@ public class ChessBoardActivity extends AppCompatActivity {
 	}
 
 	public boolean saveRecording(String title) {
-		String current_dt = DateFormat.getDateTimeInstance().format(new Date());
+		Date today = Calendar.getInstance().getTime();
+		String current_dt = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(today);
 		try{
-			// Write list of Users, converted to ArrayList to allow serialization
+			// Save game to ser file
 			FileOutputStream fos = openFileOutput(title+"~"+current_dt+".ser", Context.MODE_PRIVATE);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(recording);

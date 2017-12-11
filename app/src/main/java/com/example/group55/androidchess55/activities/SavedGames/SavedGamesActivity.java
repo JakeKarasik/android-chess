@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.group55.androidchess55.R;
@@ -43,29 +45,32 @@ public class SavedGamesActivity extends AppCompatActivity {
         list_view.setAdapter(adapter);
         loadSavedGames();
 
+        // Set action on user input
+        list_view.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SavedGameInfo g = (SavedGameInfo)parent.getItemAtPosition(position);
+                File file = new File(getFilesDir(), g.getFileName());
+                file.delete();
+            }
+        });
+
     }
 
     public void loadSavedGames() {
-//        FileInputStream fis = context.openFileInput(fileName);
-//        ObjectInputStream is = new ObjectInputStream(fis);
-//        SimpleClass simpleClass = (SimpleClass) is.readObject();
-//        is.close();
-//        fis.close();
+//
         String[] save_files = new ContextWrapper(this).getFilesDir().list(new FilenameFilter() {
             public boolean accept(File dir, String name) {
                 return name.endsWith(".ser");
             }
         });
 
-        if (save_files == null) {
-            Log.d("ERROR", "SAVE_FILES IS NULL!");
+        if (save_files == null || save_files.length == 0) {
             return;
         }
 
         for (String s : save_files) {
-            Log.d("SAVE_FILES", s);
-            SavedGameInfo game = new SavedGameInfo(s.split("~")[0], Calendar.getInstance(), null);
-            adapter.add(game);
+            adapter.add(new SavedGameInfo(s));
         }
     }
 }
