@@ -604,6 +604,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 			return true;
 		}catch(Exception e){
+			Log.d("savedRecording()", "failed", e);
 			return false;
 		}
 	}

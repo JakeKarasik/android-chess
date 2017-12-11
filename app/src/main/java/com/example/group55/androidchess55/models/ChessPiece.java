@@ -2,6 +2,7 @@ package com.example.group55.androidchess55.models;
 
 import com.example.group55.androidchess55.activities.ChessBoard.ChessBoardActivity;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -13,7 +14,11 @@ import java.util.*;
  * @author Jake Karasik (jak451)
  * @author Benjamin Ker (bk375)
  */
-public abstract class ChessPiece {
+public abstract class ChessPiece implements Serializable {
+	/**
+	 * Used for tracking serialized version
+	 */
+	private static final long serialVersionUID = 1L;
 	/**
 	 * Piece name.
 	 */
