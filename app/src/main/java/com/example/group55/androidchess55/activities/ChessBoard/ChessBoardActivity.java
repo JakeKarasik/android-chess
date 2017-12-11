@@ -123,7 +123,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 	/**
 	 * List of all boards in current game
 	 */
-	static LinkedList<ChessPiece[]> recording = new LinkedList<>();
+	static LinkedList<ChessPiece[]> recording;
 
 	/**
 	 * Resets board to default state when called.
@@ -178,6 +178,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 		// Display board
 		adapter = new ChessBoardAdapter(ChessBoardActivity.this, horizon_board);
 		convertToHorizon();
+		recording.add(copyBoard());
 		board_grid = findViewById(R.id.board_grid);
 		board_grid.setAdapter(adapter);
 
@@ -191,6 +192,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 	}
 
 	public void makeMove(int position) {
+
 
 		// Sets turn color based on turn number
 		turn_color = (turn % 2 == 0) ? 'b' : 'w';
@@ -228,11 +230,11 @@ public class ChessBoardActivity extends AppCompatActivity {
 			boolean pass = true;
 			if (isInCheck) {
 				pass = false;
-				if(prev_piece.getName() == 'K'){
+				if(prev_piece.getName() == 'K' && escape_check != null){
 					for (int[] item : escape_check) {
 						if (Arrays.equals(item, dest)) { pass = true; }
 					}
-				}else{
+				}else if(deny_check != null){
 					for (int[] item : deny_check) {
 						if (Arrays.equals(item, dest)) { pass = true; }
 					}
@@ -248,7 +250,6 @@ public class ChessBoardActivity extends AppCompatActivity {
 				}
 
 				// Copy board and move
-				recording.add(copyBoardToHorizon());
 				prev_piece.move(dest);
 
 				// Check for promotion
@@ -259,7 +260,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 				// Update board state
 				convertToHorizon();
-				recording.add(copyBoardToHorizon());
+				recording.add(copyBoard());
 				board_grid.setAdapter(adapter);
 				turn++;
 				moving = false;
@@ -340,6 +341,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 
 				// Update board state
 				convertToHorizon();
+				recording.add(copyBoard());
 				board_grid.setAdapter(adapter);
 				turn++;
 				moving = false;
@@ -356,22 +358,25 @@ public class ChessBoardActivity extends AppCompatActivity {
 				// Check if a king has been placed in check
 				if (!ChessPiece.isSafe(white_king, 'w')) {
 
+					// If white player placed himself in check, undo
 					if (turn_color == 'w') {
 						canUndo = true;
 						undo(null);
+						canUndo = true;
 						return;
 					}
 					isInCheck = true;
 					if (board[white_king[0]][white_king[1]].mateChecker()) {
 						endGameNotification("Checkmate, Black Wins!");
 					} else {
-						showNotification("Check");
+						showNotification("White King in Check");
 					}
 				} else if (!ChessPiece.isSafe(black_king, 'b')) {
 
 					if (turn_color == 'b') {
 						canUndo = true;
 						undo(null);
+						canUndo = true;
 						return;
 					}
 
@@ -379,7 +384,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 					if (board[black_king[0]][black_king[1]].mateChecker()) {
 						endGameNotification("Checkmate, White Wins!");
 					} else {
-						showNotification("Check");
+						showNotification("Black King in Check");
 					}
 				} else {
 					isInCheck = false;
@@ -558,8 +563,10 @@ public class ChessBoardActivity extends AppCompatActivity {
 	 * @param v View calling moveAI
 	 */
 	public void moveAI(View v) {
+		int cur_turn = turn;
 		// Get current turn color
 		char curr_color = (turn % 2 == 0) ? 'b' : 'w';
+
 		// Choose random starting point
 		int start_pos = new Random().nextInt(64);
 
@@ -591,6 +598,9 @@ public class ChessBoardActivity extends AppCompatActivity {
 		int choice = new Random().nextInt(possible_moves.size());
 		int[] selected_move = possible_moves.get(choice);
 		makeMove((selected_move[0]*8)+selected_move[1]);
+		if (cur_turn == turn) {
+			moveAI(null);
+		}
 	}
 
 	public boolean saveRecording(String title) {
@@ -725,7 +735,7 @@ public class ChessBoardActivity extends AppCompatActivity {
 		return input[0] >= 0 && input[1] >= 0 && input[0] <= 7 && input[1] <= 7;
 	}
 
-	public ChessPiece[] copyBoardToHorizon() {
+	public ChessPiece[] copyBoard() {
 
 		ChessPiece[] temp_board = new ChessPiece[64];
 		for (int i = 0; i < 64; i++) {
@@ -736,8 +746,15 @@ public class ChessBoardActivity extends AppCompatActivity {
 		return temp_board;
 	}
 
-	public void loadHorizonToBoard(ChessPiece[] horizon){
+	public void loadBoard(ChessPiece[] horizon){
 
+		board = new ChessPiece[8][8];
+		for(int i = 0; i < 64; i++){
+			if(horizon[i] != null) {
+				board[i / 8][i % 8] = cloner(horizon[i]);
+			}
+		}
+		convertToHorizon();
 	}
 
 	/**
@@ -747,12 +764,14 @@ public class ChessBoardActivity extends AppCompatActivity {
 	 */
 	public void undo(View v) {
 		if (canUndo) {
-
+			Log.d("stuff", Integer.toString(recording.size()));
 			// Remove last board since it was undone
 			recording.removeLast();
+			Log.d("stuff", Integer.toString(recording.size()));
 
 			ChessPiece[] temp = recording.getLast();
-			loadHorizonToBoard(temp);
+			loadBoard(temp);
+			board_grid.setAdapter(adapter);
 
 
 			// Update global states
