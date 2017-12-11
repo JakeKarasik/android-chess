@@ -1,6 +1,7 @@
 package com.example.group55.androidchess55.activities.ChessBoard;
 
 import android.content.Context;
+import android.icu.text.DateFormat;
 import android.util.Log;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,10 +23,8 @@ import com.example.group55.androidchess55.models.*;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -494,7 +493,11 @@ public class ChessBoardActivity extends AppCompatActivity {
 				String title = edittext.getText().toString().trim();
 				if (!title.isEmpty()) {
 					// Do stuff to save game...
-
+					if (saveRecording(title)) {
+						Log.d("SAVE STATUS", "SAVED");
+					} else {
+						Log.d("SAVE STATUS", "FAILED TO SAVE");
+					}
 					// Close dialog, end chessboard activity and send back to homescreen
 					dialog.cancel();
 					Intent intent = new Intent(ChessBoardActivity.this, HomeScreenActivity.class);
@@ -591,13 +594,10 @@ public class ChessBoardActivity extends AppCompatActivity {
 	}
 
 	public boolean saveRecording(String title) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-		Calendar current_dt = Calendar.getInstance();
-		String current_dt_str = dateFormat.format(current_dt);
-
+		String current_dt = DateFormat.getDateTimeInstance().format(new Date());
 		try{
 			// Write list of Users, converted to ArrayList to allow serialization
-			FileOutputStream fos = openFileOutput(title+"~"+current_dt_str+".ser", Context.MODE_PRIVATE);
+			FileOutputStream fos = openFileOutput(title+"~"+current_dt+".ser", Context.MODE_PRIVATE);
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(recording);
 			oos.close();
