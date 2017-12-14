@@ -6,7 +6,7 @@
     <string name="ai_move">AI Move</string>
     <string name="undo">Undo</string>
     <string name="draw">Draw</string>
-    <string name="forfeit">Forfeit</string>
+    <string name="forfeit">Resign</string>
     <string name="home_chess_image">home_chess_image</string>
     <string name="sort_by_date">Sort By Date</string>
     <string name="sort_by_title">Sort by Title</string>
